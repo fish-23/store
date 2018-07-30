@@ -1,48 +1,49 @@
-#!/usr/bin/python
+#!/usr/local/python3
 # -*- coding: UTF-8 -*-
+
 import bottle
 import os.path
 import base64
 import io
 import struct
+import sys
+sys.path.append('../')
+sys.path.append('/root')
 from log import *
+from config import *
 from PIL import Image
+from store_view import *
+from bottle import *
 # python3 -m pip install Pillow
+
 
 app = application = bottle.Bottle()
 
 
-@app.route('/')
-def store():
 
-        #x = request.environ.get('X-Real-IP')
-	todo_html = read_file("tmpl/todo.html")
-	return todo_html
+@app.route('/product_add')
+def store():
+        #ipaddr = request.environ.get('X-Real-IP')
+        #log.info('product_add ip is %s'%ipaddr)
+	proadd_html = read_file("templates/product_add.html")
+	return proadd_html
 
 @app.route('/api/v1/product_add', method='POST')
 def store():
-        log.info('11111111111')
-        print('222222222222')
-        # 接收图片文件
         pic = request.files.get('pic')
-        # 用os.path.splitext方法把文件名和后缀分离
+        print('type pic is', type(pic))
+        print('pic is', pic)
         name, ext = os.path.splitext(pic.filename)
-        # 修改文件名
-        pic.filename = ''.join(('123',ext))
-        # 保存图片
-        pic.save('/root',overwrite=True)
-        # 接收前端传来的所有文件，并编码成utf-8
-        postValue = bottle.request.POST.decode('utf-8')
-        # 取出图片文件(<class 'bottle.FileUpload'>)
-        pic = bottle.request.POST.get('pic')
-        # 读取文件(bytes 类型)
+        print('name is', name)
+        print('ext is', ext)        
+        pic.filename = ''.join(('',ext))
         pic = pic.file.read()
-        # =用在URL、Cookie里面会造成歧义，很多Base64编码后会把=去掉，此时加上=
-        pic = base64.b64decode(str(pic) + '='*(4-len(pic)%4))
-        # 保存文件
-        file=open('/root/789.jpg','wb')
-        file.write(pic)
-        file.close()
+        print('type pic is', type(pic))
+        print('pic is', pic)        
+        pic.save('/root',overwrite=True)
+
+
+
 
 @app.route('/show')
 def show():
