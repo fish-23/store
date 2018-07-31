@@ -6,7 +6,8 @@ sys.path.append('/root')
 from config import *
 from sqlalchemy import *
 from sqlalchemy.orm import *
-from sqlalchemy.ext.declarative import*
+from sqlalchemy.ext.declarative import *
+import mysql.connector
 
 
 Base = declarative_base()

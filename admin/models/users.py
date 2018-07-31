@@ -4,14 +4,14 @@
 from sqlalchemy import *
 from sqlalchemy.orm import *
 from sqlalchemy.ext.declarative import*
-from base import *
+from models.base import *
 import datetime
 
 class Users(Base):
     # 表的名字:
     __tablename__ = 'users'
     # id
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    nid = Column(Integer, primary_key=True, autoincrement=True)
     # 姓名
     name = Column(String(20))
     # 电话
@@ -38,3 +38,11 @@ class Users(Base):
     created_time = Column(DateTime, default=datetime.datetime.now())
     # 关系
     user_pro = relationship("Products", backref="user")
+
+    def __repr__(self):
+        output = "(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" \
+                 %(self.nid, self.name, self.phone, self.nickname,\
+                 self.password, self.cookie_num, self.avatur, self.balance,\
+                 self.integral, self.gender, self.birthday, self.login_time, self.created_time)
+        return output
+Base.metadata.create_all(engine)

@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import bottle
-import os.path
+import os
 import base64
 import io
 import struct
@@ -13,8 +13,8 @@ from log import *
 from config import *
 from PIL import Image
 from store_view import *
+from store_user import *
 from bottle import *
-# python3 -m pip install Pillow
 
 
 app = application = bottle.Bottle()
@@ -23,27 +23,25 @@ app = application = bottle.Bottle()
 
 @app.route('/product_add')
 def store():
-        #ipaddr = request.environ.get('X-Real-IP')
-        #log.info('product_add ip is %s'%ipaddr)
-	proadd_html = read_file("templates/product_add.html")
-	return proadd_html
+        ipaddr = request.environ.get('X-Real-IP')
+        log.info('product_add ip is %s'%ipaddr)
+        proadd_html = read_file('templates/product_add.html')
+        return proadd_html
 
 @app.route('/api/v1/product_add', method='POST')
 def store():
+        name = request.forms.get('name')
+        num = request.forms.get('num')
+        price = request.forms.get('price')
+        discount = request.forms.get('discount')
+        description = request.forms.get('description')
         pic = request.files.get('pic')
-        print('type pic is', type(pic))
-        print('pic is', pic)
-        name, ext = os.path.splitext(pic.filename)
-        print('name is', name)
-        print('ext is', ext)        
-        pic.filename = ''.join(('',ext))
-        pic = pic.file.read()
-        print('type pic is', type(pic))
-        print('pic is', pic)        
-        pic.save('/root',overwrite=True)
-
-
-
+        x = pic.file
+        log.info('x is %s'%x)
+        saveret = saveImage(name, pic)
+        if saveret == -1:
+            return red_writing_1(u'图片格式不是常用图片格式','/',u'点击返回主页')
+        
 
 @app.route('/show')
 def show():
