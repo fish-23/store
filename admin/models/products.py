@@ -22,7 +22,7 @@ class Products(Base):
     # 产品缩略图
     thumbnail = Column(Text)
     # 原图地址
-    picaddr = Column(String(20))
+    picaddr = Column(String(50))
     # 产品详情
     description = Column(Text)
     # 库存

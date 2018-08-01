@@ -33,14 +33,21 @@ def store():
         name = request.forms.get('name')
         num = request.forms.get('num')
         price = request.forms.get('price')
+        print(price)
         discount = request.forms.get('discount')
         description = request.forms.get('description')
+        proret = saveproduct(name, num, price, discount, description)
+        if proret == -1:
+            return red_writing_1(u'价格,折扣价格,数量必须是数字','/',u'点击返回主页')
         pic = request.files.get('pic')
-        x = pic.file
-        log.info('x is %s'%x)
-        saveret = saveImage(name, pic)
-        if saveret == -1:
+        picret = saveImage(name, pic)
+        if picret == -1:
             return red_writing_1(u'图片格式不是常用图片格式','/',u'点击返回主页')
+        if picret == -2:
+            return red_writing_1(u'产品已经存在','/',u'点击返回主页')
+        picaddr = lis[0]
+        nid = lis[1]
+         
         
 
 @app.route('/show')
