@@ -10,5 +10,6 @@
            [官网地址](http://effbot.org/imagingbook/image.htm#image-open-function)
            bottle接收的图片(pic) 类型(<class 'bottle.FileUpload'>)  处理成file object  pic.file 然后调用open函数，成功
            <PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=198x190 at 0x7F33B26313C8>
-           
-           
+### 5，修改 .html文件后，用浏览器调用接口没变化
+      解答：浏览器清除 自动填写的表单数据，重新调用，成功
+      
