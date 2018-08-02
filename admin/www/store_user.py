@@ -16,69 +16,79 @@ from models.users import *
 from models.products import *
 
 
+# login
+def check_login(name, password):
+    if name != ADMINNAME or password != ADMINPASSW:
+        return -1
+    return 0
+
+
 # 图片存储
-def saveImage(name, pic):
+def saveImage(name, pic, nid):
     try:
         pic_name, pic_ext = os.path.splitext(pic.filename)
         pic_ext = pic_ext.lower()
         if str(pic_ext) not in ['.jpeg', '.bmp', '.png', '.webp', '.gif', '.jpg']:
-            return(-1)
-        
+            return(-1)       
         pic.filename = ''.join(('%s_pic'%name, pic_ext))
         pic.save(PATHPWD,overwrite=True)
         picname = pic.filename
         picaddr = PATHPWD + picname
-        return recordImage(picaddr,pic) 
+        return recordImage(picaddr,pic, nid) 
     except Exception as e:
         log.error(traceback.format_exc())
 
-def recordImage(picaddr,pic):
+def recordImage(picaddr,pic, nid):
     try:
         pic = pic.file
         img = Image.open(pic)
         if img.mode != 'RGB':
             img = img.convert('RGB')
         imge = img.resize((100,70))
-        # 存储
+        # 存缩略图
         session = DBSession()
-        new_product = Products(picaddr = picaddr, users_id = 1)
-        session.add(new_product)       
+        ret = session.query(Products).filter(Products.nid == nid).first()
+        ret.picaddr = picaddr
         session.commit()
         session.close()
-        # 查id
-        session = DBSession()          
-        ret = session.query(Products.nid).filter(Products.picaddr == picaddr).first()          
-        session.commit()
-        session.close() 
-        # 查询结束 
-        nid = ret[0] 
-        lis = []
-        lis.append(picaddr)
-        lis.append(ret)      
-        return lis
+        return 0
     except Exception as e:
         log.error(traceback.format_exc())
 
-def saveproduct(name, num, price, discount, description):
+
+# 产品管理
+def saveproduct(name, num, price, discount, description, pic):
     try:
-        print(price)
-        print(type(price))
-        price = int(price)
-        print(type(price)) 
         try:
             num = int(num)
-            print('1111111')
             price = float(price)
-            print('2222222222')
             discount = float(discount)
-            print('33333333333333')
         except Exception as e:
             return -1
+        if name == '':
+            return -2
+        if pic == None:
+            return -4
+        # 查询name
         session = DBSession()
-        new_product = Products(picaddr = picaddr, users_id = 1)
+        ret = session.query(Products.name).filter(Products.name == name).first()
+        session.commit()
+        session.close()
+        if ret:
+            return -3
+        # 产品增加
+        session = DBSession()
+        new_product = Products(name=name, num=num, price=price, discount=discount,
+                              description=description, users_id = 1)
         session.add(new_product)
         session.commit()
         session.close()
+        # 查询id
+        session = DBSession()
+        ret = session.query(Products.nid).filter(Products.name == name).first()
+        session.commit()
+        session.close()
+        nid = ret[0]
+        return nid        
     except Exception as e:
         log.error(traceback.format_exc())
- 
