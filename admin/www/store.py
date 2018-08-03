@@ -24,7 +24,8 @@ app = application = bottle.Bottle()
 @app.route('/')
 def index():
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if check_login(name, ADMINPASSW) == -1:
+        log.info('index name is %s'%name)
+        if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
         ipaddr = request.environ.get('X-Real-IP')
         log.info('index ip is %s'%ipaddr)
@@ -34,15 +35,15 @@ def index():
 
 # login 
 @app.route('/login')
-def login_page():
+def login():
 	login_html = read_file("templates/login.html")
 	return login_html
 
 @app.route('/api/v1/login', method="POST")
-def apilogin():
+def apiLogin():
         name = request.forms.get('name')
         password = request.forms.get('password')
-        checkret = check_login(name, password)
+        checkret = checkLogin(name, password)
         if checkret == -1:
            return red_writing_1(u'用户名密码不正确','/login',u'点击重新登录')
         response.set_cookie('cookie_name', name, secret = 'asf&*457', domain='114.67.224.92', path = '/')
@@ -53,14 +54,19 @@ def apilogin():
 @app.route('/product_list')
 def list():
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if check_login(name, ADMINPASSW) == -1:
+        log.info('product_list name is %s'%name)
+        if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
-        
+        findret = findProduct(name)
+        if findret == -1:
+            return red_writing_1(u'添加第一件产品','/product_add','添加') 
+        h = listHtml(findret)
+        return h          
 
 @app.route('/product_add')
 def add():
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if check_login(name, ADMINPASSW) == -1:
+        if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
         ipaddr = request.environ.get('X-Real-IP')
         log.info('product_add ip is %s'%ipaddr)
@@ -68,7 +74,8 @@ def add():
         return proadd_html
 
 @app.route('/api/v1/product_add', method='POST')
-def apiadd():
+def apiAdd():
+        user_name = request.get_cookie('cookie_name', secret = 'asf&*457')
         name = request.forms.get('name')
         name = name.strip()
         num = request.forms.get('num')
@@ -76,24 +83,23 @@ def apiadd():
         discount = request.forms.get('discount')
         description = request.forms.get('description')
         pic = request.files.get('pic')
-        proret = saveproduct(name, num, price, discount, description, pic)
+        proret = saveProduct(name, num, price, discount, description, pic, user_name)
         if proret == -1:
-            return red_writing_1(u'价格,折扣价格,数量必须是数字','/product_add',u'点击返回主页')
+            return red_writing_1(u'价格,折扣价格,数量必须是数字','/product_add',u'返回')
         if proret == -2:
-            return red_writing_1(u'产品名格式不正确','/product_add',u'点击返回主页')
+            return red_writing_1(u'产品名格式不正确','/product_add',u'返回')
         if proret == -3:
-            return red_writing_1(u'产品存在','/product_add',u'点击返回主页')
+            return red_writing_1(u'产品存在','/product_add',u'返回')
         if proret == -4:
-            return red_writing_1(u'缩略图错误','/product_add',u'点击返回主页')
+            return red_writing_1(u'缩略图错误','/product_add',u'返回')
         nid = proret
         picret = saveImage(name, pic, nid)
         if picret == -1:
-            return red_writing_1(u'图片格式不是常用图片格式','/',u'点击返回主页')
-        return red_writing_1(u'产品录入成功','/list',u'点击返回主页')
+            return red_writing_1(u'图片格式不是常用图片格式','/product_add',u'返回')
+        return red_writing_1(u'产品录入成功','/product_list',u'点击进入产品列表')
 
  
 class StripPathMiddleware(object):
-
     def __init__(self, a):
         self.a = a
     def __call__(self, e, h):

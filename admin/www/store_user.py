@@ -17,7 +17,7 @@ from models.products import *
 
 
 # login
-def check_login(name, password):
+def checkLogin(name, password):
     if name != ADMINNAME or password != ADMINPASSW:
         return -1
     return 0
@@ -57,7 +57,7 @@ def recordImage(picaddr,pic, nid):
 
 
 # 产品管理
-def saveproduct(name, num, price, discount, description, pic):
+def saveProduct(name, num, price, discount, description, pic, user_name):
     try:
         try:
             num = int(num)
@@ -69,21 +69,27 @@ def saveproduct(name, num, price, discount, description, pic):
             return -2
         if pic == None:
             return -4
-        # 查询name
+        # 查找用户id
+        session = DBSession()
+        ret = session.query(Users.nid).filter(Users.name == user_name).first()
+        session.commit()
+        session.close()
+        users_id = ret[0]        
+        # 查找产品名
         session = DBSession()
         ret = session.query(Products.name).filter(Products.name == name).first()
         session.commit()
         session.close()
         if ret:
             return -3
-        # 产品增加
+        # 增加产品
         session = DBSession()
         new_product = Products(name=name, num=num, price=price, discount=discount,
-                              description=description, users_id = 1)
+                               description=description, users_id = users_id)
         session.add(new_product)
         session.commit()
         session.close()
-        # 查询id
+        # 查找产品id
         session = DBSession()
         ret = session.query(Products.nid).filter(Products.name == name).first()
         session.commit()
@@ -92,3 +98,25 @@ def saveproduct(name, num, price, discount, description, pic):
         return nid        
     except Exception as e:
         log.error(traceback.format_exc())
+
+def findProduct(name):
+    try:
+        # 查找用户id
+        session = DBSession()
+        ret = session.query(Users.nid).filter(Users.name == name).first()
+        session.commit()
+        session.close()
+        users_id = ret[0]
+        # 查找产品
+        session = DBSession()
+        ret =  session.query(Products).filter(Products.users_id == users_id)
+        session.commit()
+        session.close()
+        if ret == []:
+            return -1
+        return ret  
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+
+
