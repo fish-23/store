@@ -98,6 +98,36 @@ def apiAdd():
             return red_writing_1(u'图片格式不是常用图片格式','/product_add',u'返回')
         return red_writing_1(u'产品录入成功','/product_list',u'点击进入产品列表')
 
+@app.route('/product_del/<html_nid>')
+def lis_del(html_nid):
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        log.info('list_del name is %s'%name)
+        if checkLogin(name, ADMINPASSW) == -1:
+            return red_writing_1(u'用户尚未登录','/login',u'点击登录')            
+        delProduct(html_nid)  
+        return redirect('/product_list')
+
+@app.route('/product_modify/<html_nid>')
+def product_modify(html_nid):
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        log.info('list_del name is %s'%name)
+        if checkLogin(name, ADMINPASSW) == -1:
+            return red_writing_1(u'用户尚未登录','/login',u'点击登录') 
+        listModifyHtml = modifyProduct(html_nid)
+        return listModifyHtml
+
+@app.route('/api/v1/product_modify', method='POST')
+def product_modify():
+        name = request.forms.get('name')
+        name = name.strip()
+        num = request.forms.get('num')
+        price = request.forms.get('price')
+        discount = request.forms.get('discount')
+        description = request.forms.get('description')
+        pic = request.files.get('pic')
+        users_id = request.forms.get('users_id')
+        picaddr = request.forms.get('picaddr')
+        return red_writing_1(u'功能开发中','/product_list',u'点击返回')
  
 class StripPathMiddleware(object):
     def __init__(self, a):

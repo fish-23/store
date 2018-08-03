@@ -6,11 +6,13 @@ import time,datetime
 import sys
 import base64
 import io
+import os
 sys.path.append('../')
 sys.path.append('/root')
 from log import *
 from config import *
 from PIL import Image
+from store_view import *
 from models.base import *
 from models.users import *
 from models.products import *
@@ -109,7 +111,7 @@ def findProduct(name):
         users_id = ret[0]
         # 查找产品
         session = DBSession()
-        ret =  session.query(Products).filter(Products.users_id == users_id)
+        ret =  session.query(Products).filter(Products.users_id == users_id).order_by(Products.nid.desc())
         session.commit()
         session.close()
         if ret == []:
@@ -118,5 +120,26 @@ def findProduct(name):
     except Exception as e:
         log.error(traceback.format_exc())
 
+def delProduct(html_nid):
+        # 查找图片路径
+        session = DBSession()
+        ret =  session.query(Products.picaddr).filter(Products.nid == html_nid).one()
+        session.commit()
+        session.close() 
+        picaddr = ret.picaddr
+        # 删除产品
+        session = DBSession()
+        session.query(Products).filter(Products.nid == html_nid).delete()
+        session.commit()
+        session.close()
+        # 删除图片                  
+        os.system('rm -rf %s'%picaddr)
+        return 0 
 
-
+def modifyProduct(html_nid):                
+        # 查找产品信息
+        session = DBSession()
+        ret =  session.query(Products).filter(Products.nid == html_nid)
+        session.commit()
+        session.close()
+        return listModifyHtml(ret)

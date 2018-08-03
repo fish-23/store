@@ -31,9 +31,6 @@ def read_file(file_name):
 	return ct
 
 def listHtml(ret):
-    print('44444444444444444')
-    print(type(ret)) 
-    print(ret)
     h = u'<html><body>'
     display_space = '&nbsp'*6
     for i in ret:
@@ -52,7 +49,7 @@ def listHtml(ret):
         h = h + '<font>' + '折扣价格：' + str(html_discount) + '</font>' + '<br>'
         h = h + '<br>' +  '<font>' + '库存余量：' + str(html_num) + '</font>' + display_space                  
         h = h + '<font>' + '产品详情：' + html_description + '</font>' +  '<br>'
-        h = h + '<br>' + '产品缩略图：' + '<img src="%s" width="128" height="128" />'%html_picaddr + '<br>'
+        h = h + '<br>' + '产品缩略图：' + '<img src="./static/products/apple_pic.png" width="128" height="128" />' + '<br>'
         h = h + '<br>' + '<a href="/product_del/' + str(html_nid) + u'">删除</a>' + display_space 
         h = h + '<a href="/product_modify/' + str(html_nid) + u'">修改</a ><br>'
     welcome = u'<fieldset><legend><h2>产品列表</h2></legend>'
@@ -61,3 +58,31 @@ def listHtml(ret):
     index_link = u'<a href="/">点击返回主页</a ><body></html>'+ '<br>'
     h = welcome+ h + add_link + display_space + index_link + entry_time
     return h
+
+def listModifyHtml(ret):
+        html_name = ret.first().name
+        html_price = ret.first().price
+        html_discount  = ret.first().discount
+        html_num  = ret.first().num
+        html_description  = ret.first().description
+        picaddr = ret.first().picaddr
+        users_id = ret.first().users_id                  
+        display_space = '&nbsp'*6                  
+        h = '<html><body>'
+        h = h + '<form action="/api/v1/product_modify" method="post" enctype="multipart/form-data">'                      
+        h = h + '<font color="red">'+ u'产品名称：' + html_name + display_space                            
+        h = h + '<font color="red">'+ u'产品价格：' + str(html_price) + display_space                    
+        h = h + '<font color="red">'+ u'折扣价格：' + str(html_discount)  + '<br>'                         
+        h = h + '<br>' +  '<font color="red">'+ u'库存余量：' + str(html_num) + display_space                  
+        h = h + '<font color="red">'+ u'产品详情：' + html_description + '<br>'
+        h = h + '<input type="hidden" name="users_id" value="%s"/>'%users_id 
+        h = h + '<input type="hidden" name="picaddr" value="%s"/>'%picaddr + '<br>'
+        h = h + '<p>' + '<font color=rgb(0,0,255)>' + '产品名称：' + '<input type="text" name="name"/>' + '</p>'
+        h = h + '<p>' + '产品价格：' + '<input type="text" name="price"/>' + '</p>'                                 
+        h = h + '<p>' + '折扣价格：' + '<input type="text" name="discount"/>' + '</p>'               
+        h = h + '<p>' + '库存余量：' + '<input type="text" name="num"/>' + '</p>'                    
+        h = h + '<p>' + '产品详情：' + '<input type="text" name="description"/>' + '</p>'
+        h = h + '<p>' + '产品缩略图：' + '<input type="file" name="pic" />' + '</p>'
+        h = h + '<p>' + '<input type="submit" value="修改"/>' + '</p>'        
+        h = h + '</body></html>'
+        return h
