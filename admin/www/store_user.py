@@ -46,11 +46,17 @@ def recordImage(picaddr,pic, nid):
         img = Image.open(pic)
         if img.mode != 'RGB':
             img = img.convert('RGB')
-        imge = img.resize((100,70))
+        imge = img.resize((130,90))
+        # 缩略图转base64
+        output_buffer = io.BytesIO()
+        imge.save(output_buffer, format='JPEG')      
+        byte_data = output_buffer.getvalue()
+        base64_str = base64.b64encode(byte_data)
         # 存缩略图
         session = DBSession()
         ret = session.query(Products).filter(Products.nid == nid).first()
         ret.picaddr = picaddr
+        ret.thumbnail = base64_str
         session.commit()
         session.close()
         return 0
@@ -114,8 +120,8 @@ def findProduct(name):
         ret =  session.query(Products).filter(Products.users_id == users_id).order_by(Products.nid.desc())
         session.commit()
         session.close()
-        if ret == []:
-            return -1
+        #if ret == []:
+            #return -1
         return ret  
     except Exception as e:
         log.error(traceback.format_exc())

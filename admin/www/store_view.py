@@ -1,6 +1,8 @@
 ﻿#!/usr/local/python3
 # -*- coding: UTF-8 -*-
-import time,datetime
+
+import time,datetime,io
+from PIL import Image
 
 display_space = '&nbsp' + '&nbsp' + '&nbsp' + '&nbsp' + '&nbsp' + '&nbsp'
 
@@ -40,16 +42,17 @@ def listHtml(ret):
         html_discount  = i.discount 
         html_num  = i.num
         html_description  = i.description
-        html_picaddr  = i.picaddr                   
+        html_picaddr  = i.picaddr 
+        html_thumbnail = i.thumbnail                  
         html_createdtime  = i.created_time 
         html_createdtime = str(html_createdtime)
-        html_createdtime = html_createdtime[:10]                  
+        html_createdtime = html_createdtime[:10]
         h = h + '<font>' + '产品名称：' + html_name + '</font>' + display_space
         h = h + '<font>' + '产品价格：' + str(html_price) + '</font>' + display_space
         h = h + '<font>' + '折扣价格：' + str(html_discount) + '</font>' + '<br>'
         h = h + '<br>' +  '<font>' + '库存余量：' + str(html_num) + '</font>' + display_space                  
         h = h + '<font>' + '产品详情：' + html_description + '</font>' +  '<br>'
-        h = h + '<br>' + '产品缩略图：' + '<img src="./static/products/apple_pic.png" width="128" height="128" />' + '<br>'
+        h = h + '<br>' + '产品缩略图：' + '<img src="data:image/jpg;base64,%s"/>'%html_thumbnail + '<br>'
         h = h + '<br>' + '<a href="/product_del/' + str(html_nid) + u'">删除</a>' + display_space 
         h = h + '<a href="/product_modify/' + str(html_nid) + u'">修改</a ><br>'
     welcome = u'<fieldset><legend><h2>产品列表</h2></legend>'

@@ -27,7 +27,7 @@ def index():
         log.info('index name is %s'%name)
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
-        ipaddr = request.environ.get('X-Real-IP')
+        ipaddr = request.environ.get('X-Real-IP2')
         log.info('index ip is %s'%ipaddr)
         index_html = read_file('templates/index.html')
         return index_html
@@ -46,7 +46,7 @@ def apiLogin():
         checkret = checkLogin(name, password)
         if checkret == -1:
            return red_writing_1(u'用户名密码不正确','/login',u'点击重新登录')
-        response.set_cookie('cookie_name', name, secret = 'asf&*457', domain='114.67.224.92', path = '/')
+        response.set_cookie('cookie_name', name, secret = 'asf&*457', domain='admin.fish-23.com', path = '/')
         redirect('/')
 
 
@@ -58,8 +58,8 @@ def list():
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
         findret = findProduct(name)
-        if findret == -1:
-            return red_writing_1(u'添加第一件产品','/product_add','添加') 
+        #if findret == -1:
+            #return red_writing_1(u'添加第一件产品','/product_add','添加') 
         h = listHtml(findret)
         return h          
 
