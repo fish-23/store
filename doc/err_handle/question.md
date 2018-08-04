@@ -12,4 +12,8 @@
            <PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=198x190 at 0x7F33B26313C8>
 ### 5，修改 .html文件后，用浏览器调用接口没变化
       解答：浏览器清除 自动填写的表单数据，重新调用，成功
-      
+### 6，用Image处理后生成的缩略图，如何保存到数据库
+      解答：先将图片转化成二进制流，然后用base64进行编码后，就可以存入数据库
+           [参考文档](https://www.jianshu.com/p/2ff8e6f98257)
+### 7，将bytes64编码的图片，用html展示
+      解答：<img src="data:image/jpg;base64,%s"/>'%html_thumbnail
