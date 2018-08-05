@@ -31,7 +31,7 @@ def insertData():
                    description = '产品',
                    parent_id = 1
                    )
-    session.add(categories_first)
+    session.add(categories_second)
     session.commit()
     session.close()
 
