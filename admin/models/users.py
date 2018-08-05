@@ -1,4 +1,4 @@
-﻿#!/usr/local/python3
+#!/usr/local/python3
 # -*- coding: UTF-8 -*-
 
 from sqlalchemy import *
@@ -37,12 +37,11 @@ class Users(Base):
     # 用户创建时间
     created_time = Column(DateTime, default=datetime.datetime.now())
     # 关系
-    user_pro = relationship("Products", backref="user")
+    groups = relationship("Groups", backref="users")
 
     def __repr__(self):
-        output = "(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" \
+        output = "(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" \
                  %(self.nid, self.name, self.phone, self.nickname,\
                  self.password, self.cookie_num, self.avatur, self.balance,\
                  self.integral, self.gender, self.birthday, self.login_time, self.created_time)
         return output
-#Base.metadata.create_all(engine)

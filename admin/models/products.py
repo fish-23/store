@@ -5,7 +5,8 @@ from sqlalchemy import *
 from sqlalchemy.orm import *
 from sqlalchemy.ext.declarative import*
 from models.base import *
-from models.users import *
+from models.categories import *
+from models.groups import *
 import datetime
 
 class Products(Base):
@@ -26,14 +27,18 @@ class Products(Base):
     # 产品详情
     description = Column(Text)
     # 库存
-    num = Column(Integer)
-    # 用户表
-    users_id = Column(Integer, ForeignKey('users.nid'))
+    stock = Column(Integer)
     # 产品创建时间
     created_time = Column(DateTime, default=datetime.datetime.now())
+    # 分类
+    categories_id = Column(Integer, ForeignKey('categories.nid'))
+    # 公司
+    groups_id = Column(Integer, ForeignKey('groups.nid'))
+    # 关系
+    productparameters = relationship("ProductParameters", backref="products")
+    
     def __repr__(self):
-        output = "(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" \
-                 %(self.nid, self.name, self.price, self.discount, self.created_time,\
-                 self.thumbnail, self.picaddr, self.description, self.num, self.users_id)
+        output = "(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" \
+                 %(self.nid, self.name, self.price, self.discount, self.created_time, self.picaddr,\
+                 self.thumbnail, self.description, self.stock, self.categories_id, self.groups_id)
         return output
-#Base.metadata.create_all(engine)
