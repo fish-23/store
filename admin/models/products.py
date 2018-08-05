@@ -36,4 +36,4 @@ class Products(Base):
                  %(self.nid, self.name, self.price, self.discount, self.created_time,\
                  self.thumbnail, self.picaddr, self.description, self.num, self.users_id)
         return output
-Base.metadata.create_all(engine)
+#Base.metadata.create_all(engine)

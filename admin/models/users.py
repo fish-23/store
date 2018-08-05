@@ -45,4 +45,4 @@ class Users(Base):
                  self.password, self.cookie_num, self.avatur, self.balance,\
                  self.integral, self.gender, self.birthday, self.login_time, self.created_time)
         return output
-Base.metadata.create_all(engine)
+#Base.metadata.create_all(engine)
