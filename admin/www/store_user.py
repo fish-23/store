@@ -77,13 +77,8 @@ def saveProduct(name, num, price, discount, description, pic, user_name):
             return -2
         if pic == None:
             return -4
-        # 查找用户id
-        session = DBSession()
-        ret = session.query(Users.nid).filter(Users.name == user_name).first()
-        session.commit()
-        session.close()
-        users_id = ret[0]        
         # 查找产品名
+        print('1111111111111111')
         session = DBSession()
         ret = session.query(Products.name).filter(Products.name == name).first()
         session.commit()
@@ -93,7 +88,7 @@ def saveProduct(name, num, price, discount, description, pic, user_name):
         # 增加产品
         session = DBSession()
         new_product = Products(name=name, num=num, price=price, discount=discount,
-                               description=description, users_id = users_id)
+                               description=description, categories_id=4, groups_id=1)
         session.add(new_product)
         session.commit()
         session.close()
@@ -109,19 +104,21 @@ def saveProduct(name, num, price, discount, description, pic, user_name):
 
 def findProduct(name):
     try:
-        # 查找用户id
+        # 查找公司id
         session = DBSession()
-        ret = session.query(Users.nid).filter(Users.name == name).first()
+        ret = session.query(Groups.nid).join(Users).filter(Groups.users_id == Users.nid.in_(session.query(Users.nid).filter(Users.name == name))).first()
         session.commit()
         session.close()
-        users_id = ret[0]
+        groups_id = ret[0]
         # 查找产品
-        session = DBSession()
-        ret =  session.query(Products).filter(Products.users_id == users_id).order_by(Products.nid.desc())
-        session.commit()
-        session.close()
-        #if ret == []:
-            #return -1
+        try:
+            session = DBSession()
+            ret =  session.query(Products).filter(Products.groups_id == groups_id).order_by(Products.nid.desc())
+            session.commit()
+            session.close()
+            print('666666666666666')
+        except Exception as e:
+            return -1
         return ret  
     except Exception as e:
         log.error(traceback.format_exc())

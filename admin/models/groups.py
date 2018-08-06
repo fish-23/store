@@ -1,40 +1,26 @@
 #!/usr/local/python3
 # -*- coding: UTF-8 -*-
 
-from sqlalchemy import *
-from sqlalchemy.orm import *
-from sqlalchemy.ext.declarative import*
-from models.base import *
-import datetime
+from peewee import *
+from models.base import BaseModel
+from models.users import Users
+from models.categories import Categories
+from datetime import datetime
 
-class Groups(Base):
-    # 表的名字:
-    __tablename__ = 'groups'
-    # id
-    nid = Column(Integer, primary_key=True, autoincrement=True)
+class Groups(BaseModel):
     # 店铺名称
-    name = Column(String(50))
+    name = CharField(null=True)
     # 描述
-    description = Column(Text)
+    description = TextField(null=True)
     # 缩略图
-    thumbnail = Column(Text)
+    thumbnail = TextField(null=True)
     # 地址
-    address = Column(Text)
+    address = TextField(null=True)
     # 服务热线
-    phone = Column(String(20))
-    #phone = Column(String(20), unique=True)
-    # 拥有者
-    users_id = Column(Integer, ForeignKey('users.nid'))
+    phone = CharField(null=True)    
     # 分类
-    categories_id = Column(Integer, ForeignKey('categories.nid'))
-    # 店铺创建时间
-    created_time = Column(DateTime, default=datetime.datetime.now())  
-    # 关系
-    products = relationship("Products", backref="groups")
-    settings = relationship("Settings", backref="groups")
-
-    def __repr__(self):
-        output = "(%s,%s,%s,%s,%s,%s,%s,%s,%s)" \
-                 %(self.nid, self.name, self.description, self.thumbnail, self.phone, \
-                   self.address, self.users_id, self.categories_id, self.created_time)
-        return output
+    category = ForeignKeyField(Categories, related_name='category_groups', on_delete='CASCADE')
+    # 拥有者
+    owner = ForeignKeyField(Users, related_name='owner_groups', on_delete='CASCADE')
+    # 公司创建时间
+    created_time = DateTimeField(default=datetime.now)  

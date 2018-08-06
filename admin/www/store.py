@@ -58,8 +58,8 @@ def list():
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
         findret = findProduct(name)
-        #if findret == -1:
-            #return red_writing_1(u'添加第一件产品','/product_add','添加') 
+        if findret == -1:
+            return red_writing_1(u'添加第一件产品','/product_add','添加') 
         h = listHtml(findret)
         return h          
 
@@ -85,7 +85,7 @@ def apiAdd():
         pic = request.files.get('pic')
         proret = saveProduct(name, num, price, discount, description, pic, user_name)
         if proret == -1:
-            return red_writing_1(u'价格,折扣价格,数量必须是数字','/product_add',u'返回')
+            return red_writing_1(u'价格,折扣价格,数量必须是正数','/product_add',u'返回')
         if proret == -2:
             return red_writing_1(u'产品名格式不正确','/product_add',u'返回')
         if proret == -3:
