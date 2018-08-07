@@ -53,13 +53,12 @@ def apiLogin():
 # 产品管理
 @app.route('/product_list')
 def list():
+        group_id = request.get_cookie('group_id', secret = 'asf&*458')
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
         log.info('product_list name is %s'%name)
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
-        findret = findProduct(name)
-        if findret == -1:
-            return red_writing_1(u'添加第一件产品','/product_add','添加') 
+        findret = findProduct(name, group_id)
         h = listHtml(findret)
         return h          
 
@@ -83,7 +82,8 @@ def apiAdd():
         discount = request.forms.get('discount')
         description = request.forms.get('description')
         pic = request.files.get('pic')
-        proret = saveProduct(name, num, price, discount, description, pic, user_name)
+        category = request.forms.get('category')
+        proret = saveProduct(name, num, price, discount, description, pic, user_name, category)
         if proret == -1:
             return red_writing_1(u'价格,折扣价格,数量必须是正数','/product_add',u'返回')
         if proret == -2:
@@ -92,16 +92,17 @@ def apiAdd():
             return red_writing_1(u'产品存在','/product_add',u'返回')
         if proret == -4:
             return red_writing_1(u'缩略图错误','/product_add',u'返回')
-        nid = proret
-        picret = saveImage(name, pic, nid)
+        product_id = proret[0]
+        group_id = proret[1]
+        picret = saveImage(name, pic, product_id)
         if picret == -1:
             return red_writing_1(u'图片格式不是常用图片格式','/product_add',u'返回')
+        response.set_cookie('group_id', group_id, secret = 'asf&*458', domain='admin.fish-23.com', path = '/')
         return red_writing_1(u'产品录入成功','/product_list',u'点击进入产品列表')
 
 @app.route('/product_del/<html_nid>')
 def lis_del(html_nid):
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        log.info('list_del name is %s'%name)
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')            
         delProduct(html_nid)  
@@ -110,7 +111,6 @@ def lis_del(html_nid):
 @app.route('/product_modify/<html_nid>')
 def product_modify(html_nid):
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        log.info('list_del name is %s'%name)
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录') 
         listModifyHtml = modifyProduct(html_nid)
@@ -125,7 +125,6 @@ def product_modify():
         discount = request.forms.get('discount')
         description = request.forms.get('description')
         pic = request.files.get('pic')
-        users_id = request.forms.get('users_id')
         picaddr = request.forms.get('picaddr')
         return red_writing_1(u'功能开发中','/product_list',u'点击返回')
  

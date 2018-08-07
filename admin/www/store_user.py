@@ -53,19 +53,17 @@ def recordImage(picaddr,pic, nid):
         byte_data = output_buffer.getvalue()
         base64_str = base64.b64encode(byte_data)
         # 存缩略图
-        session = DBSession()
-        ret = session.query(Products).filter(Products.nid == nid).first()
+        ret = Products.get(Products.id == nid)
         ret.picaddr = picaddr
         ret.thumbnail = base64_str
-        session.commit()
-        session.close()
+        ret.save()
         return 0
     except Exception as e:
         log.error(traceback.format_exc())
 
 
 # 产品管理
-def saveProduct(name, num, price, discount, description, pic, user_name):
+def saveProduct(name, num, price, discount, description, pic, user_name, category):
     try:
         try:
             num = int(num)
@@ -73,76 +71,50 @@ def saveProduct(name, num, price, discount, description, pic, user_name):
             discount = float(discount)
         except Exception as e:
             return -1
+        if num<0 or price<0 or discount<0 or price<discount:
+            return -1
         if name == '':
             return -2
         if pic == None:
             return -4
-        # 查找产品名
-        print('1111111111111111')
-        session = DBSession()
-        ret = session.query(Products.name).filter(Products.name == name).first()
-        session.commit()
-        session.close()
-        if ret:
+        owner_id = Users.select(Users.id).where(Users.name == user_name)
+        group = Groups.get(Groups.owner == owner_id)
+        group_id = group.id
+        product = Products.select().where(Products.name == name).count()
+        if product > 0:
             return -3
-        # 增加产品
-        session = DBSession()
-        new_product = Products(name=name, num=num, price=price, discount=discount,
-                               description=description, categories_id=4, groups_id=1)
-        session.add(new_product)
-        session.commit()
-        session.close()
-        # 查找产品id
-        session = DBSession()
-        ret = session.query(Products.nid).filter(Products.name == name).first()
-        session.commit()
-        session.close()
-        nid = ret[0]
-        return nid        
+        product = Products.create(
+                                 name=name, 
+                                 num=num, 
+                                 price=price, 
+                                 discount=discount,
+                                 description=description, 
+                                 category=int(category), 
+                                 group=group_id
+                                 )
+        
+        lis = []
+        product_id = product.id
+        lis.append(int(product_id))
+        lis.append(int(group_id))
+        return lis        
     except Exception as e:
         log.error(traceback.format_exc())
 
-def findProduct(name):
+def findProduct(name, group_id):
     try:
-        # 查找公司id
-        session = DBSession()
-        ret = session.query(Groups.nid).join(Users).filter(Groups.users_id == Users.nid.in_(session.query(Users.nid).filter(Users.name == name))).first()
-        session.commit()
-        session.close()
-        groups_id = ret[0]
-        # 查找产品
-        try:
-            session = DBSession()
-            ret =  session.query(Products).filter(Products.groups_id == groups_id).order_by(Products.nid.desc())
-            session.commit()
-            session.close()
-            print('666666666666666')
-        except Exception as e:
-            return -1
+        ret = Products.select().where(Products.group== group_id).order_by(Products.category,Products.id.desc())
         return ret  
     except Exception as e:
         log.error(traceback.format_exc())
 
 def delProduct(html_nid):
-        # 查找图片路径
-        session = DBSession()
-        ret =  session.query(Products.picaddr).filter(Products.nid == html_nid).one()
-        session.commit()
-        session.close() 
+        ret = Products.get(Products.id == html_nid)
         picaddr = ret.picaddr
-        # 删除产品
-        session = DBSession()
-        session.query(Products).filter(Products.nid == html_nid).delete()
-        session.commit()
-        session.close()
-        # 删除图片                  
+        ret.delete_instance()
         os.system('rm -rf %s'%picaddr)
         return 0 
 
 def modifyProduct(html_nid):                
-        # 查找产品信息
-        session = DBSession()
-        ret =  session.query(Products).filter(Products.nid == html_nid)
-        session.commit()
-        session.close()
+        ret = Products.get(Products.id == html_nid)
         return listModifyHtml(ret)
