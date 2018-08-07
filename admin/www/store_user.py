@@ -16,6 +16,7 @@ from store_view import *
 from models.base import *
 from models.users import *
 from models.products import *
+from models.product_parameters import *
 
 
 # login
@@ -23,6 +24,21 @@ def checkLogin(name, password):
     if name != ADMINNAME or password != ADMINPASSW:
         return -1
     return 0
+
+# price
+def checkPrice(num, price, discount):
+    try:
+        try:
+            num = int(num)
+            price = float(price)
+            discount = float(discount)
+        except Exception as e:
+            return -1
+        if num<0 or price<0 or discount<0 or price<discount:
+            return -1
+    except Exception as e:
+        log.error(traceback.format_exc())
+
 
 
 # 图片存储
@@ -65,13 +81,7 @@ def recordImage(picaddr,pic, nid):
 # 产品管理
 def saveProduct(name, num, price, discount, description, pic, user_name, category):
     try:
-        try:
-            num = int(num)
-            price = float(price)
-            discount = float(discount)
-        except Exception as e:
-            return -1
-        if num<0 or price<0 or discount<0 or price<discount:
+        if checkPrice(num, price, discount) == -1:
             return -1
         if name == '':
             return -2
@@ -121,6 +131,31 @@ def delProduct(html_nid):
 def modifyProduct(html_nid):                
         ret = Products.get(Products.id == html_nid)
         return listModifyHtml(ret)
+
+def findParameters(html_nid):
+        parameterret = ProductParameters.select().where(ProductParameters.product == html_nid)
+        return parameterret
+
+def delParameters(html_nid):
+        parametersret = ProductParameters.get(ProductParameters.id == html_nid)
+        parametersret.delete_instance()
+        return 0
+def saveParameters(product_nid, num, price, discount, description):
+    try:
+        if checkPrice(num, price, discount) == -1:
+            return -1
+        if description == '':
+            return -2
+        ProductParameters.create(
+                             num=num,
+                             price=price,
+                             discount=discount,
+                             description=description,
+                             product=product_nid
+                             )
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
 
 
 # 用户管理

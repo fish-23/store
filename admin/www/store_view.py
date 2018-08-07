@@ -57,7 +57,8 @@ def listHtml(ret):
         h = h + '<br>' +  '<font>' + '库存余量：' + str(html_num) + '</font>' + display_space                  
         h = h + '<font>' + '产品详情：' + html_description + '</font>' +  '<br>'
         h = h + '<br>' + '产品缩略图：' + '<img src="data:image/jpg;base64,%s"/>'%html_thumbnail + '<br>'
-        h = h + '<br>' + '<a href="/product_del/' + str(html_nid) + u'">删除</a>' + display_space 
+        h = h + '<br>' + '<a href="/parameters_list/' + str(html_nid) + u'">产品规格</a>' + display_space
+        h = h + '<a href="/product_del/' + str(html_nid) + u'">删除</a>' + display_space 
         h = h + '<a href="/product_modify/' + str(html_nid) + u'">修改</a ><br>'
     welcome = u'<fieldset><legend><h2>产品列表</h2></legend>'
     entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
@@ -94,6 +95,31 @@ def listModifyHtml(ret):
         h = h + '</body></html>'
         return h
 
+def parametersHtml(findret, product_nid):
+    h = u'<html><body>'
+    display_space = '&nbsp'*6
+    for i in findret:
+        html_nid = i.id
+        html_price = i.price 
+        html_discount  = i.discount
+        html_description  = i.description 
+        html_num  = i.num
+        html_createdtime  = i.created_time
+        html_createdtime = str(html_createdtime)
+        html_createdtime = html_createdtime[:10]
+        h = h + '<font>' + '规格价格：' + str(html_price) + '</font>' + display_space
+        h = h + '<font>' + '折扣价格：' + str(html_discount) + '</font>' + display_space
+        h = h + '<font>' + '规格库存：' + str(html_num) + '</font>' + display_space
+        h = h + '<font>' + '规格描述：' + str(html_description) + '</font>' + display_space
+        h = h + '<font>' + '创建时间：' + html_createdtime + '</font>' + display_space
+        h = h + '<font>' + '<a href="/parameters_del/' + str(html_nid) + u'">删除</a>' + '<br>'
+    welcome = u'<fieldset><legend><h2>规格列表</h2></legend>'
+    entry_time = u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    add_link = '<br>' + u'<a href="/parameters_add/' + str(product_nid) + u'">点击添加</a ><body></html>' + display_space
+    index_link =  u'<a href="/">点击返回主页</a ><body></html>' + '</br>'
+    h = welcome+ h  + '<br>' + add_link +  index_link + entry_time
+    return h
+
 
 # 用户管理
 def userListHtml(userret):
@@ -122,4 +148,3 @@ def userListHtml(userret):
     index_link = '<br>' + u'<a href="/">点击返回主页</a ><body></html>' + '</br>'
     h = welcome+ h  + '<br>' + index_link + entry_time
     return h
-

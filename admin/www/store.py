@@ -24,7 +24,6 @@ app = application = bottle.Bottle()
 @app.route('/')
 def index():
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        log.info('index name is %s'%name)
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
         ipaddr = request.environ.get('X-Real-IP2')
@@ -54,7 +53,6 @@ def apiLogin():
 @app.route('/product_list')
 def list():
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        log.info('product_list name is %s'%name)
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
         findret = findProduct(name)
@@ -125,6 +123,54 @@ def product_modify():
         pic = request.files.get('pic')
         picaddr = request.forms.get('picaddr')
         return red_writing_1(u'功能开发中','/product_list',u'点击返回')
+
+@app.route('/parameters_list/<html_nid>')
+def list(html_nid):
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        if checkLogin(name, ADMINPASSW) == -1:
+            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        findret = findParameters(html_nid)
+        product_nid = html_nid
+        h = parametersHtml(findret, product_nid)
+        return h
+
+@app.route('/parameters_add/<product_nid>')
+def add(product_nid):
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        if checkLogin(name, ADMINPASSW) == -1:
+            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        ipaddr = request.environ.get('X-Real-IP')
+        log.info('product_add ip is %s'%ipaddr)
+        paramadd_html = read_file('templates/parameters_add.html')
+        response.set_cookie('product_nid', product_nid, secret = 'asf&*458', domain='admin.fish-23.com', path = '/')
+        return paramadd_html
+
+@app.route('/api/v1/parameters_add', method='POST')
+def apiAdd():
+        product_nid = request.get_cookie('product_nid', secret = 'asf&*458')
+        num = request.forms.get('num')
+        price = request.forms.get('price')
+        discount = request.forms.get('discount')
+        description = request.forms.get('name')
+        description = description.encode('utf8')
+        description = description.decode('utf-8', errors='ignore')
+        print('1111111111')
+        print(description)
+        pararet = saveParameters(product_nid, num, price, discount, description)
+        if pararet == -1:
+            return red_writing_1(u'价格,折扣价格,数量必须是正数','/parameters_add/%s'%product_nid, u'返回')
+        if pararet == -2:
+            return red_writing_1(u'规格描述不能为空','/product_add/%s'%product_nid, u'返回')
+        return red_writing_1(u'规格录入成功','/parameters_list/%s'%product_nid,u'点击进入规格列表')
+
+@app.route('/parameters_del/<html_nid>')
+def lis_del(html_nid):
+        product_nid = request.get_cookie('product_nid', secret = 'asf&*458')
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        if checkLogin(name, ADMINPASSW) == -1:
+            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        delret = delParameters(html_nid)
+        return redirect('/parameters_list/%s'%product_nid)
 
 
 # 用户管理
