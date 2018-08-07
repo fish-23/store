@@ -50,7 +50,7 @@ def insertData():
     # users
     new_users = Users.create(
              name = ADMINNAME, 
-             phone = '18312345678', 
+             cellphone = '18312345678', 
              nickname = '管理员', 
              password = ADMINPASSWMD,
              birthday = '2018-08', 

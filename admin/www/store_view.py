@@ -32,6 +32,8 @@ def read_file(file_name):
 	fd.close()
 	return ct
 
+
+# 产品管理
 def listHtml(ret):
     h = u'<html><body>'
     display_space = '&nbsp'*6
@@ -91,3 +93,33 @@ def listModifyHtml(ret):
         h = h + '<p>' + '<input type="submit" value="修改"/>' + '</p>'        
         h = h + '</body></html>'
         return h
+
+
+# 用户管理
+def userListHtml(userret):
+    h = u'<html><body>'
+    display_space = '&nbsp'*6
+    for i in userret:
+        html_nid = i.id
+        html_name = i.name
+        html_cellphone = i.cellphone
+        html_nickname = i.nickname 
+        html_avatur = i.avatur
+        html_balance = i.balance 
+        html_integral = i.integral 
+        html_createdtime  = i.created_time
+        html_createdtime = str(html_createdtime)
+        html_createdtime = html_createdtime[:10]
+        h = h + '<font>' + '昵称：' + html_nickname + '</font>' + display_space
+        h = h + '<font>' + '姓名：' + html_name + '</font>' + display_space
+        h = h + '<font>' + '电话：' + html_cellphone + '</font>' + display_space
+        h = h + '<font>' + '余额：' + str(html_balance) + '</font>' + display_space
+        h = h + '<font>' + '积分：' + str(html_integral) + '</font>' + display_space
+        h = h + '<font>' + '注册时间：' + html_createdtime + '</font>' + display_space
+        h = h + '<font>' + '<a href="/user_del/' + str(html_nid) + u'">删除</a>' + '<br>'
+    welcome = u'<fieldset><legend><h2>用户列表</h2></legend>'
+    entry_time = u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    index_link = '<br>' + u'<a href="/">点击返回主页</a ><body></html>' + '</br>'
+    h = welcome+ h  + '<br>' + index_link + entry_time
+    return h
+

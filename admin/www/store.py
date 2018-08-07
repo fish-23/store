@@ -53,12 +53,11 @@ def apiLogin():
 # 产品管理
 @app.route('/product_list')
 def list():
-        group_id = request.get_cookie('group_id', secret = 'asf&*458')
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
         log.info('product_list name is %s'%name)
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
-        findret = findProduct(name, group_id)
+        findret = findProduct(name)
         h = listHtml(findret)
         return h          
 
@@ -97,7 +96,6 @@ def apiAdd():
         picret = saveImage(name, pic, product_id)
         if picret == -1:
             return red_writing_1(u'图片格式不是常用图片格式','/product_add',u'返回')
-        response.set_cookie('group_id', group_id, secret = 'asf&*458', domain='admin.fish-23.com', path = '/')
         return red_writing_1(u'产品录入成功','/product_list',u'点击进入产品列表')
 
 @app.route('/product_del/<html_nid>')
@@ -127,6 +125,28 @@ def product_modify():
         pic = request.files.get('pic')
         picaddr = request.forms.get('picaddr')
         return red_writing_1(u'功能开发中','/product_list',u'点击返回')
+
+
+# 用户管理
+@app.route('/user_list')
+def list():
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        if checkLogin(name, ADMINPASSW) == -1:
+            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        userret = findUser(name)
+        h = userListHtml(userret)
+        return h
+
+@app.route('/user_del/<html_nid>')
+def lis_del(html_nid):
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        if checkLogin(name, ADMINPASSW) == -1:
+            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        delret = delUser(html_nid)
+        if delret == -1:
+            return red_writing_1(u'不能删除系统管理员','/user_list',u'点击返回')
+        return redirect('/user_list')
+
  
 class StripPathMiddleware(object):
     def __init__(self, a):

@@ -101,8 +101,11 @@ def saveProduct(name, num, price, discount, description, pic, user_name, categor
     except Exception as e:
         log.error(traceback.format_exc())
 
-def findProduct(name, group_id):
+def findProduct(name):
     try:
+        owner_id = Users.select(Users.id).where(Users.name == name)
+        group = Groups.get(Groups.owner == owner_id)
+        group_id = group.id
         ret = Products.select().where(Products.group== group_id).order_by(Products.category,Products.id.desc())
         return ret  
     except Exception as e:
@@ -118,3 +121,17 @@ def delProduct(html_nid):
 def modifyProduct(html_nid):                
         ret = Products.get(Products.id == html_nid)
         return listModifyHtml(ret)
+
+
+# 用户管理
+def findUser(name):
+        userret = Users.select()
+        return userret
+
+def delUser(html_nid):
+        userret = Users.get(Users.id == html_nid)
+        name = userret.name
+        if name == 'admin':
+            return -1
+        userret.delete_instance() 
+        return 0 
