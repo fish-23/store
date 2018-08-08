@@ -7,5 +7,5 @@ CATEGORY_DATA = [{'name':'水果', 'description':'水果', 'parent_name':'产品
                 ]
 
 # setting
-SETTING_DATA = [{'name':100, 'value':10, 'description':'运费', 'groups':1}]
+SETTING_DATA = [{'name':100, 'value':10, 'description':'carriage', 'groups':1}]
                      

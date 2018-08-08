@@ -3,6 +3,10 @@
 
 import time,datetime,io
 from PIL import Image
+import sys
+sys.path.append('/root')
+from log import *
+
 
 display_space = '&nbsp' + '&nbsp' + '&nbsp' + '&nbsp' + '&nbsp' + '&nbsp'
 
@@ -37,6 +41,8 @@ def read_file(file_name):
 def listHtml(ret):
     h = u'<html><body>'
     display_space = '&nbsp'*6
+    log.info('1111111111')
+    log.info(ret)
     for i in ret:
         html_nid = i.id
         html_name = i.name
@@ -107,17 +113,18 @@ def parametersHtml(findret, product_nid):
         html_createdtime  = i.created_time
         html_createdtime = str(html_createdtime)
         html_createdtime = html_createdtime[:10]
+        h = h + '<font>' + '规格描述：' + str(html_description) + '</font>' + display_space
         h = h + '<font>' + '规格价格：' + str(html_price) + '</font>' + display_space
         h = h + '<font>' + '折扣价格：' + str(html_discount) + '</font>' + display_space
         h = h + '<font>' + '规格库存：' + str(html_num) + '</font>' + display_space
-        h = h + '<font>' + '规格描述：' + str(html_description) + '</font>' + display_space
         h = h + '<font>' + '创建时间：' + html_createdtime + '</font>' + display_space
         h = h + '<font>' + '<a href="/parameters_del/' + str(html_nid) + u'">删除</a>' + '<br>'
     welcome = u'<fieldset><legend><h2>规格列表</h2></legend>'
     entry_time = u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     add_link = '<br>' + u'<a href="/parameters_add/' + str(product_nid) + u'">点击添加</a ><body></html>' + display_space
+    product_link = u'<a href="/product_list">点击返回产品列表</a ><body></html>' + display_space
     index_link =  u'<a href="/">点击返回主页</a ><body></html>' + '</br>'
-    h = welcome+ h  + '<br>' + add_link +  index_link + entry_time
+    h = welcome+ h  + '<br>' + add_link + product_link + index_link + entry_time
     return h
 
 
@@ -147,4 +154,24 @@ def userListHtml(userret):
     entry_time = u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     index_link = '<br>' + u'<a href="/">点击返回主页</a ><body></html>' + '</br>'
     h = welcome+ h  + '<br>' + index_link + entry_time
+    return h
+
+
+# 邮费管理
+def carriageHtml(findret):
+    h = u'<html><body>'
+    display_space = '&nbsp'*6
+    for i in findret:
+        html_nid = i.id
+        html_name = i.name
+        html_value  = i.value
+        html_description = i.description 
+        h = h + '<font>' + '包邮界限：' + html_name + '</font>' + display_space
+        h = h + '<font>' + '邮费：' + html_value + '</font>' + display_space
+        h = h + '<font>' + '<a href="/carriage_del/' + str(html_nid) + u'">删除</a>' + '<br>'
+    welcome = u'<fieldset><legend><h2>邮费管理</h2></legend>'
+    entry_time = u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    add_link = '<br>' + u'<a href="/carriage_add">点击添加</a ><body></html>' + display_space
+    index_link = u'<a href="/">点击返回主页</a ><body></html>' + '</br>'
+    h = welcome+ h  + '<br>' + add_link + index_link + entry_time
     return h

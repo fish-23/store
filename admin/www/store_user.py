@@ -17,13 +17,18 @@ from models.base import *
 from models.users import *
 from models.products import *
 from models.product_parameters import *
+from models.settings import *
 
 
 # login
 def checkLogin(name, password):
-    if name != ADMINNAME or password != ADMINPASSW:
-        return -1
-    return 0
+    try:
+        if name != ADMINNAME or password != ADMINPASSW:
+            return -1
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
+
 
 # price
 def checkPrice(num, price, discount):
@@ -122,24 +127,37 @@ def findProduct(name):
         log.error(traceback.format_exc())
 
 def delProduct(html_nid):
+    try:
         ret = Products.get(Products.id == html_nid)
         picaddr = ret.picaddr
         ret.delete_instance()
         os.system('rm -rf %s'%picaddr)
         return 0 
+    except Exception as e:
+        log.error(traceback.format_exc())
 
-def modifyProduct(html_nid):                
+def modifyProduct(html_nid):      
+    try:          
         ret = Products.get(Products.id == html_nid)
         return listModifyHtml(ret)
+    except Exception as e:
+        log.error(traceback.format_exc())
 
 def findParameters(html_nid):
+    try:
         parameterret = ProductParameters.select().where(ProductParameters.product == html_nid)
         return parameterret
+    except Exception as e:
+        log.error(traceback.format_exc())
 
 def delParameters(html_nid):
+    try:
         parametersret = ProductParameters.get(ProductParameters.id == html_nid)
         parametersret.delete_instance()
         return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
+
 def saveParameters(product_nid, num, price, discount, description):
     try:
         if checkPrice(num, price, discount) == -1:
@@ -160,13 +178,51 @@ def saveParameters(product_nid, num, price, discount, description):
 
 # 用户管理
 def findUser(name):
+    try:
         userret = Users.select()
         return userret
+    except Exception as e:
+        log.error(traceback.format_exc())
 
 def delUser(html_nid):
+    try:
         userret = Users.get(Users.id == html_nid)
         name = userret.name
         if name == 'admin':
             return -1
         userret.delete_instance() 
-        return 0 
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+
+# 运费管理
+def findCarriage(name):
+    try:
+        carriageret = Settings.select().where(Settings.description == 'carriage')
+        return carriageret
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+def delCarriage(html_nid):
+    try:
+        carriageret = Settings.get(Settings.id == html_nid)
+        carriageret.delete_instance()
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+def saveCarriage(name,value):
+    try:
+        if checkPrice(name,value,1) == -1:
+            return -1
+        Settings.create(
+                     name=name,
+                     value=value,
+                     description='carriage',
+                     groups=1
+                     )
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
+

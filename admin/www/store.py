@@ -53,6 +53,8 @@ def apiLogin():
 @app.route('/product_list')
 def list():
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        log.info('222222222222222')
+        log.info('product_list name is %s'%name)
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
         findret = findProduct(name)
@@ -64,7 +66,7 @@ def add():
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
-        ipaddr = request.environ.get('X-Real-IP')
+        ipaddr = request.environ.get('X-Real-IP2')
         log.info('product_add ip is %s'%ipaddr)
         proadd_html = read_file('templates/product_add.html')
         return proadd_html
@@ -139,7 +141,7 @@ def add(product_nid):
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
-        ipaddr = request.environ.get('X-Real-IP')
+        ipaddr = request.environ.get('X-Real-IP2')
         log.info('product_add ip is %s'%ipaddr)
         paramadd_html = read_file('templates/parameters_add.html')
         response.set_cookie('product_nid', product_nid, secret = 'asf&*458', domain='admin.fish-23.com', path = '/')
@@ -152,10 +154,6 @@ def apiAdd():
         price = request.forms.get('price')
         discount = request.forms.get('discount')
         description = request.forms.get('name')
-        description = description.encode('utf8')
-        description = description.decode('utf-8', errors='ignore')
-        print('1111111111')
-        print(description)
         pararet = saveParameters(product_nid, num, price, discount, description)
         if pararet == -1:
             return red_writing_1(u'价格,折扣价格,数量必须是正数','/parameters_add/%s'%product_nid, u'返回')
@@ -193,7 +191,53 @@ def lis_del(html_nid):
             return red_writing_1(u'不能删除系统管理员','/user_list',u'点击返回')
         return redirect('/user_list')
 
+
+# 运费管理
+@app.route('/carriage_list')
+def list():
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        if checkLogin(name, ADMINPASSW) == -1:
+            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        findret = findCarriage(name)
+        h = carriageHtml(findret)
+        return h
  
+@app.route('/carriage_del/<html_nid>')
+def lis_del(html_nid):
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        if checkLogin(name, ADMINPASSW) == -1:
+            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        delret = delCarriage(html_nid)
+        return redirect('/carriage_list')
+
+@app.route('/carriage_add')
+def add():
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        if checkLogin(name, ADMINPASSW) == -1:
+            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        ipaddr = request.environ.get('X-Real-IP2')
+        log.info('carriage_add ip is %s'%ipaddr)
+        caradd_html = read_file('templates/carriage_add.html')
+        return caradd_html
+
+@app.route('/api/v1/carriage_add', method='POST')
+def apiAdd():
+        name = request.forms.get('name')
+        value = request.forms.get('value')
+        pararet = saveCarriage(name,value)
+        if pararet == -1:
+            return red_writing_1(u'保有界限和邮费必须是正数','/carriage_add', u'返回')
+        return red_writing_1(u'邮费录入成功','/carriage_list',u'点击返回')
+
+
+@app.error(404)
+def err(err):
+	return red_writing_1(u'页面不存在','/',u'点击返回主页')
+
+@app.error(405)
+def err(err):
+	return red_writing_1(u'访问方式不正确','/',u'点击返回主页')
+
 class StripPathMiddleware(object):
     def __init__(self, a):
         self.a = a

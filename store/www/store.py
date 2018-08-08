@@ -2,8 +2,11 @@
 # -*- coding: UTF-8 -*-
 from bottle import route, run, static_file,request
 import bottle,os.path,base64,io,struct
+import sys
+sys.path.append('../')
+sys.path.append('/root')
 from log import *
-# python3 -m pip install Pillow
+from config import *
 from PIL import Image
 
 
@@ -11,7 +14,7 @@ from PIL import Image
 app = application = bottle.Bottle()
 @app.route('/')
 def store():
-        return()
+        return('1111111111')
      
 
 class StripPathMiddleware(object):
