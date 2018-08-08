@@ -1,6 +1,12 @@
 ﻿#!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
+import sys
+sys.path.append('../')
+sys.path.append('/root')
+from log import *
+from config import *
+
 display_space = '&nbsp' + '&nbsp' + '&nbsp' + '&nbsp' + '&nbsp' + '&nbsp'
 
 def red_writing(msg):
@@ -28,3 +34,4 @@ def read_file(file_name):
 	ct = str(fd.read())
 	fd.close()
 	return ct
+
