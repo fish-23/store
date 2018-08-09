@@ -66,7 +66,7 @@ def add():
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
-        ipaddr = request.environ.get('X-Real-IP2')
+        ipaddr = request.headers.get('X-Real-IP2')
         log.info('product_add ip is %s'%ipaddr)
         proadd_html = read_file('templates/product_add.html')
         return proadd_html
@@ -82,7 +82,16 @@ def apiAdd():
         description = request.forms.get('description')
         pic = request.files.get('pic')
         category = request.forms.get('category')
-        proret = saveProduct(name, num, price, discount, description, pic, user_name, category)
+        picret = checkPic(pic)
+        if picret == -1:
+            return red_writing_1(u'图片不能为空','/product_add',u'返回')
+        if picret == -2:
+            return red_writing_1(u'图片不能大于1M','/product_add',u'返回')
+        if picret == -3:
+            return red_writing_1(u'该文件不是真正的图片','/product_add',u'返回')
+        if picret == -4:
+            return red_writing_1(u'图片格式不是常用图片格式','/product_add',u'返回')
+        proret = saveProduct(name, num, price, discount, description, user_name, category)
         if proret == -1:
             return red_writing_1(u'价格,折扣价格,数量必须是正数','/product_add',u'返回')
         if proret == -2:
@@ -90,14 +99,12 @@ def apiAdd():
         if proret == -3:
             return red_writing_1(u'产品存在','/product_add',u'返回')
         if proret == -4:
-            return red_writing_1(u'缩略图错误','/product_add',u'返回')
+            return red_writing_1(u'价格,折扣价格,数量必须大于0.01，小于9999','/product_add',u'返回')
         product_id = proret[0]
         group_id = proret[1]
         picret = saveImage(name, pic, product_id)
-        if picret == -1:
-            return red_writing_1(u'图片格式不是常用图片格式','/product_add',u'返回')
         return red_writing_1(u'产品录入成功','/product_list',u'点击进入产品列表')
-
+        
 @app.route('/product_del/<html_nid>')
 def lis_del(html_nid):
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
@@ -141,7 +148,7 @@ def add(product_nid):
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
-        ipaddr = request.environ.get('X-Real-IP2')
+        ipaddr = request.headers.get('X-Real-IP2')
         log.info('product_add ip is %s'%ipaddr)
         paramadd_html = read_file('templates/parameters_add.html')
         response.set_cookie('product_nid', product_nid, secret = 'asf&*458', domain='admin.fish-23.com', path = '/')
@@ -159,6 +166,8 @@ def apiAdd():
             return red_writing_1(u'价格,折扣价格,数量必须是正数','/parameters_add/%s'%product_nid, u'返回')
         if pararet == -2:
             return red_writing_1(u'规格描述不能为空','/product_add/%s'%product_nid, u'返回')
+        if pararet == -3:
+            return red_writing_1(u'价格,折扣价格,数量必须大于0.01，小于9999','/product_add/%s'%product_nid, u'返回')
         return red_writing_1(u'规格录入成功','/parameters_list/%s'%product_nid,u'点击进入规格列表')
 
 @app.route('/parameters_del/<html_nid>')
@@ -219,7 +228,7 @@ def add():
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
-        ipaddr = request.environ.get('X-Real-IP2')
+        ipaddr = request.headers.get('X-Real-IP2')
         log.info('carriage_add ip is %s'%ipaddr)
         caradd_html = read_file('templates/carriage_add.html')
         return caradd_html
@@ -230,7 +239,9 @@ def apiAdd():
         value = request.forms.get('value')
         pararet = saveCarriage(name,value)
         if pararet == -1:
-            return red_writing_1(u'保有界限和邮费必须是正数','/carriage_add', u'返回')
+            return red_writing_1(u'包邮界限和邮费必须是正数','/carriage_add', u'返回')
+        if pararet == -2:
+            return red_writing_1(u'包邮界限不能小于邮费，并且不能大于9999,','/carriage_add', u'返回')        
         return red_writing_1(u'邮费录入成功','/carriage_list',u'点击返回')
 
 

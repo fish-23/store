@@ -39,11 +39,40 @@ def checkPrice(num, price, discount):
             discount = float(discount)
         except Exception as e:
             return -1
-        if num<0 or price<0 or discount<0 or price<discount:
-            return -1
+        if num<1 or price<0.01 or discount<0.01 or price<discount:
+            return -2
+        if num>9999 or price>9999 or discount>9999:
+            return -2
+        return 0
     except Exception as e:
         log.error(traceback.format_exc())
 
+
+# 图片检测
+def checkPic(pic):
+    try:
+        if pic == None:
+            return -1
+        pic_size = pic.file   
+        pic_size.seek(0,2)   
+        pic_size = pic_size.tell()
+        if pic_size > 1048000:
+            return -2
+        pic_distinguish = pic.file
+        bValid = True
+        try:
+            Image.open(pic_distinguish).verify()
+        except:
+            bValid = False 
+        if bValid == False:
+            return -3
+        pic_name, pic_ext = os.path.splitext(pic.filename)
+        pic_ext = pic_ext.lower()
+        if str(pic_ext) not in ['.jpeg', '.bmp', '.png', '.webp', '.gif', '.jpg']:
+            return -4
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
 
 
 # 图片存储
@@ -51,8 +80,6 @@ def saveImage(name, pic, nid):
     try:
         pic_name, pic_ext = os.path.splitext(pic.filename)
         pic_ext = pic_ext.lower()
-        if str(pic_ext) not in ['.jpeg', '.bmp', '.png', '.webp', '.gif', '.jpg']:
-            return(-1)       
         pic.filename = ''.join(('%s_pic'%name, pic_ext))
         pic.save(PATHPWD,overwrite=True)
         picname = pic.filename
@@ -84,20 +111,23 @@ def recordImage(picaddr,pic, nid):
 
 
 # 产品管理
-def saveProduct(name, num, price, discount, description, pic, user_name, category):
+def saveProduct(name, num, price, discount, description, user_name, category):
     try:
-        if checkPrice(num, price, discount) == -1:
+        checkret = checkPrice(num, price, discount)
+        if checkret == -1:
             return -1
+        if checkret == -2:
+            return -4
         if name == '':
             return -2
-        if pic == None:
-            return -4
         owner_id = Users.select(Users.id).where(Users.name == user_name)
         group = Groups.get(Groups.owner == owner_id)
         group_id = group.id
         product = Products.select().where(Products.name == name).count()
         if product > 0:
             return -3
+        price = round(float(price),2)
+        discount = round(float(discount),2)
         product = Products.create(
                                  name=name, 
                                  num=num, 
@@ -160,8 +190,11 @@ def delParameters(html_nid):
 
 def saveParameters(product_nid, num, price, discount, description):
     try:
-        if checkPrice(num, price, discount) == -1:
+        checkret = checkPrice(num, price, discount) 
+        if checkret == -1:
             return -1
+        if checkret == -2:
+            return -3
         if description == '':
             return -2
         ProductParameters.create(
@@ -213,9 +246,12 @@ def delCarriage(html_nid):
         log.error(traceback.format_exc())
 
 def saveCarriage(name,value):
-    try:
-        if checkPrice(name,value,1) == -1:
+    try:        
+        checkret =  checkPrice(1,name,value)
+        if checkret == -1:
             return -1
+        if checkret == -2:
+            return -2
         Settings.create(
                      name=name,
                      value=value,
@@ -225,4 +261,3 @@ def saveCarriage(name,value):
         return 0
     except Exception as e:
         log.error(traceback.format_exc())
-

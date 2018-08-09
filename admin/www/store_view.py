@@ -70,7 +70,7 @@ def listHtml(ret):
     entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     add_link = u'<br> <a href="/product_add">点击添加</a ><body></html>'
     index_link = u'<a href="/">点击返回主页</a ><body></html>'+ '<br>'
-    h = welcome+ h + add_link + display_space + index_link + entry_time
+    h = welcome+ h + '<br>' + add_link + display_space + index_link + entry_time
     return h
 
 def listModifyHtml(ret):
