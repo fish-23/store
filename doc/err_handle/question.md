@@ -17,3 +17,8 @@
            [参考文档](https://www.jianshu.com/p/2ff8e6f98257)
 ### 7，将bytes64编码的图片，用html展示
       解答：<img src="data:image/jpg;base64,%s"/>'%html_thumbnail
+### 8，request.environ,get('X-Real-IP') 获取不到用户的ip地址
+      解答：浏览器在请求服务器的时候，在HTTP头上会携带用户ip，现在没有获取到ip，证明在打印之前的某一步出错，没有获取到用户ip。
+           先用 nc -l 命令监听项目中途经过的端口(443端口被nginx监听，需要杀死nginx用nc监听)，看是否有错误，测试证明，所有端口都没有错误
+           那问题就是bottl接收数据时出错，去官网看bottle如何接收数据 [官网地址](http://www.bottlepy.org/docs/dev/index.html)
+           上面的代码是获取uwsgi的环境变量，获取http头的话，用request.headers.get('X-Real-IP')
