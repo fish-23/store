@@ -26,8 +26,8 @@ def index():
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
-        ipaddr = request.environ.get('X-Real-IP2')
-        log.info('index ip is %s'%ipaddr)
+        ipaddr = request.headers.get('X-Real-IP2')
+        log.info('admin index ip is %s'%ipaddr)
         index_html = read_file('templates/index.html')
         return index_html
 
@@ -52,9 +52,9 @@ def apiLogin():
 # 产品管理
 @app.route('/product_list')
 def list():
+        ipaddr = request.headers.get('X-Real-IP2')
+        log.info('admin product_list ip is %s'%ipaddr)
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        log.info('222222222222222')
-        log.info('product_list name is %s'%name)
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
         findret = findProduct(name)
@@ -174,6 +174,8 @@ def lis_del(html_nid):
 # 用户管理
 @app.route('/user_list')
 def list():
+        ipaddr = request.headers.get('X-Real-IP2')
+        log.info('admin user_list ip is %s'%ipaddr)
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
@@ -195,6 +197,8 @@ def lis_del(html_nid):
 # 运费管理
 @app.route('/carriage_list')
 def list():
+        ipaddr = request.headers.get('X-Real-IP2')
+        log.info('admin carriage_list ip is %s'%ipaddr)
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')

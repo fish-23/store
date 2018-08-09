@@ -23,8 +23,8 @@ app = application = bottle.Bottle()
 # index
 @app.route('/')
 def index():
-        ipaddr = request.environ.get('X-Real-IP3')
-        log.info('index ip is %s'%ipaddr)
+        ipaddr = request.headers.get('X-Real-IP3')
+        log.info('index browser ip is %s'%ipaddr)
         index_html = read_file('templates/index.html')
         return index_html
 
@@ -32,6 +32,8 @@ def index():
 # 用户注册
 @app.route('/register')
 def register():
+        ipaddr = request.headers.get('X-Real-IP3')
+        log.info('register browser ip is %s'%ipaddr)
 	register_html = read_file("templates/register.html")
 	return register_html
 
