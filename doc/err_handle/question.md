@@ -22,3 +22,7 @@
            先用 nc -l 命令监听项目中途经过的端口(443端口被nginx监听，需要杀死nginx用nc监听)，看是否有错误，测试证明，所有端口都没有错误
            那问题就是bottl接收数据时出错，去官网看bottle如何接收数据 [官网地址](http://www.bottlepy.org/docs/dev/index.html)
            上面的代码是获取uwsgi的环境变量，获取http头的话，用request.headers.get('X-Real-IP')
+### 9，python获取图片文件的大小
+      解答：方法一：获取具体路径下文件的大小 os.path.getsize('./static/products/apple_pic.png')
+           方法二：获取file对象的大小  pic = request.files.get('pic')   pic = pic.file   pic.seek(0,2)   size = pic.tell()
+                       
