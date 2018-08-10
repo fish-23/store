@@ -1,0 +1,40 @@
+<html>
+<body>
+<form action="/api/v1/register_add" method="post" enctype="multipart/form-data">
+<fieldset>
+   <legend> <h1>用户注册</h1></legend>
+   <p>
+   用户名：<input type="text" name="name"/>
+   </p>
+   <p>
+   密码：<input type="text" name="password"/>
+   </p>
+   <p>
+   确认密码：<input type="text" name="password2"/>
+   </p>
+   <p>
+   昵称：<input type="text" name="nickname"/>
+   </p>
+   <p>
+   出生日期：<input type="text" name="birthday"/>
+   </p>
+   <p>
+   性别：
+   <td colspan="2">
+   <select name="gender">
+   <option value="女"> 女 </option>
+   <option value="男" selected="selected">男</option>
+   </select>
+   </p>
+   <p>
+   用户头像：<input type="file" name="avatur" />
+   </p>
+   <p>
+   短信验证码：<input type="text" name="send_sms"/>
+   </p>   
+   <p>
+   <input type="submit" value="提交"/>
+   </p>
+</form>
+</body>
+</html>

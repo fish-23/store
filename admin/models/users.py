@@ -17,7 +17,9 @@ class Users(BaseModel):
     # 登录状态
     cookie_num = CharField(null=True)
     # 用户头像
-    avatur = TextField(null=True)    
+    avatur = TextField(null=True) 
+    # 头像地址
+    avaturaddr = TextField(null=True)    
     # 余额
     balance = FloatField(default=.0)
     # 积分
@@ -27,6 +29,8 @@ class Users(BaseModel):
     # 出生日期
     birthday = CharField(null=True)
     # 最后登录时间
-    login_time = DateTimeField(null=True)    
+    login_time = DateTimeField(null=True)   
+    # 邮件发送时间
+    sms_time = DateTimeField(null=True) 
     # 用户创建时间
     created_time = DateTimeField(default=datetime.now) 

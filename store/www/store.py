@@ -34,10 +34,10 @@ def index():
 def register():
         ipaddr = request.headers.get('X-Real-IP3')
         log.info('register browser ip is %s'%ipaddr)
-	register_html = read_file("templates/register.html")
-	return register_html
+        register_html = read_file("templates/register.html")
+        return register_html
 
-@app.route('/api/v1/register')
+@app.route('/api/v1/register', method="post")
 def register():
         cellphone = request.forms.get('cellphone')
         checkret = checkCellphone(cellphone)
@@ -45,7 +45,61 @@ def register():
             return red_writing_2(u'该手机号已注册','/login',u'点击登录','/',u'点击返回主页')
         if checkret == -2:
             return red_writing_1(u'手机号格式不正确','/register',u'点击重新输入')
+        ret = checkIp()
+        if ret == -1:
+            return red_writing_1(u'每个IP每天最多接收5条短信','/',u'点击返回主页')
+        sendsmsret = registerSendSms(cellphone,ret)
+        lis = []
+        lis.append(cellphone)
+        lis.append(sendsmsret)
+        response.set_cookie('register_info', lis, domain='www.fish-23.com', path = '/', secret = 'asf&*4561')
+        redirect('/register_add')
+
+@app.route('/register_add')
+def register_add():
+        register_add_html = read_file('templates/register_add.html')
+        return register_add_html
         
+@app.route('/api/v1/register_add', method="post")
+def register_add():
+        info = request.get_cookie('register_info', secret = 'asf&*4561')
+        print(info)
+        if checkRegCookie(info) == -1:
+            return red_writing_1(u'注册异常，异常的访问方式','/register',u'点击重新注册')
+        name = request.forms.get('name')
+        password = request.forms.get('password')
+        password2 = request.forms.get('password2')
+        nickname = request.forms.get('nickname')
+        birthday = request.forms.get('birthday')
+        gender = request.forms.get('gender')
+        avatur = request.files.get('avatur')
+        send_sms = request.forms.get('send_sms')
+        name = name.strip()
+        dbsend_sms = info[1]
+        cellphone = info[0]
+        picret = checkPic(avatur)
+        if picret == -1:
+            return red_writing_1(u'图片不能为空','/register_add',u'返回')
+        if picret == -2:
+            return red_writing_1(u'图片不能大于1M','/register_add',u'返回')
+        if picret == -3:
+            return red_writing_1(u'该文件不是真正的图片','/register_add',u'返回')
+        if picret == -4:
+            return red_writing_1(u'图片格式不是常用图片格式','/register_add',u'返回')
+        checkret = SaveInfo(name,password,password2,nickname,birthday,send_sms,dbsend_sms,cellphone,gender)
+        if checkret == -1:
+            return red_writing_1(u'该用户名存在','/register_add',u'点击重新输入')
+        if checkret == -2:
+            return red_writing_1(u'两次密码不一致','/register_add',u'点击重新输入')
+        if checkret == -3:
+            return red_writing_1(u'账号密码格式错误，不能小于6位','/register_add',u'点击重新输入')
+        if checkret == -4:
+            return red_writing_1(u'昵称，生日不能小于6位','/register_add',u'点击重新输入')
+        if checkret == -4:
+            return red_writing_1(u'验证码错误','/register_add',u'点击重新输入')
+        nid = checkret 
+        saveImage(name, avatur, nid)   
+        return red_writing_1(u'注册成功','/login',u'点击登陆')
 
 
 # 商品分类

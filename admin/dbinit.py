@@ -8,6 +8,7 @@ from models.categories import *
 from models.groups import *
 from models.product_parameters import *
 from models.settings import *
+from models.ips import *
 
 import sys
 sys.path.append('/root')
@@ -22,25 +23,26 @@ def createTables():
          Categories,
          Groups,
          ProductParameters,
-         Settings
+         Settings,
+         Ips
          ] 
     db.create_tables(tables)
 
 def insertData():
     # categories
-    categories_first = Categories.create(
+    categories_first = Categories.get_or_create(
                    name = '系统',
                    description = '系统'
                    )
     
-    categories_second = Categories.create(
+    categories_second = Categories.get_or_create(
                    name = '公司',
                    description = '公司',
                    parent_name = '系统',
                    parent_id = 1
                    )
     
-    categories_third = Categories.create(
+    categories_third = Categories.get_or_create(
                    name = '产品',
                    description = '产品',
                    parent_name = '系统',
@@ -48,7 +50,7 @@ def insertData():
                    )
     
     # users
-    new_users = Users.create(
+    new_users = Users.get_or_create(
              name = ADMINNAME, 
              cellphone = '18312345678', 
              nickname = '管理员', 
@@ -57,8 +59,7 @@ def insertData():
                    )
 
     # groups
-    print('1111111111111111111111111111111111')
-    new_groups = Groups.create(
+    new_groups = Groups.get_or_create(
              name = 'fish', 
              phone = '18312345678', 
              description = '公司',

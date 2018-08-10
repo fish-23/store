@@ -35,3 +35,25 @@ def read_file(file_name):
 	fd.close()
 	return ct
 
+
+# register
+def registerHtml(cellphone, send_sms):
+        h = '<html><body>'
+        h = h + '<form action="/api/v1/register_add" method="post" enctype="multipart/form-data">' 
+        h = h + '<fieldset>'
+        h = h + '<legend>' + ' <h1>' + '用户注册' + ' </h1>' + '</legend>'
+        h = h + '<input type="hidden" name="dbsend_sms" value="%s"/>'%send_sms
+        h = h + '<input type="hidden" name="cellphone" value="%s"/>'%cellphone
+        h = h + '<p>' + '用户名：' + '<input type="text" name="name"/>' + '</p>' 
+        h = h + '<p>' + '密码：' + '<input type="text" name="password"/>' + '</p>'
+        h = h + '<p>' + '确认密码：' + '<input type="text" name="password2"/>' + '</p>'      
+        h = h + '<p>' + '昵称：' + '<input type="text" name="nickname"/>' + '</p>'
+        h = h + '<p>' + '出生日期：' + '<input type="text" name="birthday"/>' + '</p>'      
+        h = h + '<p>' + '性别' + '<td colspan="2">' + '<select name="gender">' 
+        h = h + '<option value="男" selected="selected">' + '男' + '</option>'
+        h = h + '<option value="女">' + '女' + ' </option>' + '</select>' + '</p>'
+        h = h + '<p>' + '用户头像：' + '<input type="file" name="avatur" />' + '</p>'
+        h = h + '<p>' + '短信验证码：' + '<input type="text" name="send_sms"/>' + '</p>'
+        h = h + '<p>' + '<input type="submit" value="提交"/>' + '</p>'
+        h = h + '</body></html>'
+        return h
