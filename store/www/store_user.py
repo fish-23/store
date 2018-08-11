@@ -63,7 +63,7 @@ def saveImage(name, pic, nid):
         pic_name, pic_ext = os.path.splitext(pic.filename)
         pic_ext = pic_ext.lower()
         pic.filename = ''.join(('%s_pic'%name, pic_ext))
-        pic.save(PATHPWD,overwrite=True)
+        pic.save(PATHPWDU,overwrite=True)
         picname = pic.filename
         picaddr = PATHPWDU + picname
         return recordImage(picaddr,pic, nid) 
@@ -85,7 +85,7 @@ def recordImage(picaddr,pic, nid):
         # 存缩略图
         ret = Users.get(Users.id == nid)
         ret.avaturaddr = picaddr
-        ret.thumbnail = base64_str
+        ret.avatur = base64_str
         ret.save()
         return 0
     except Exception as e:
@@ -109,7 +109,10 @@ def checkIp():
             Ips.update(sendsms_time=time_now, num=0).where(Ips.ipaddr == ipaddr).execute()
         if dbnum > 4:
             return -1
-        return ipaddr
+        lis = []
+        lis.append(ipaddr)
+        lis.append(time_now)
+        return lis
     except Exception as e:
         log.error(traceback.format_exc())
 
@@ -149,23 +152,30 @@ def done_callback(futu):
 
 # 用户名密码检测
 def checkPasswd(name,password,password2):
-    dbusers = Users.select().where(Users.name == name)
-    if dbusers.count() != 0:
-        return -1
-    if password != password2:
-        return -2
-    if len(name) < 6 or name.isspace() == True:
-        return -3
-    if len(password) < 6 or password.isspace() == True:
-        return -3
+    try:
+        dbusers = Users.select().where(Users.name == name)
+        if dbusers.count() != 0:
+            return -1
+        if password != password2:
+            return -2
+        if len(name) < 6 or name.isspace() == True:
+            return -3
+        if len(password) < 6 or password.isspace() == True:
+            return -3
+    except Exception as e:
+        log.error(traceback.format_exc())
 
 # register
 async def sendInfo(ipaddr):
-    dbip = Ips.get(Ips.ipaddr == ipaddr)
-    dbnum = dbip.num
-    num = dbnum + 1
-    dbip.num = num
-    dbip.save()
+    try:
+        dbip = Ips.get(Ips.ipaddr == ipaddr)
+        dbnum = dbip.num
+        num = dbnum + 1
+        dbip.num = num
+        dbip.save()
+    except Exception as e:
+        log.error(traceback.format_exc())
+
 
 def registerSendSms(cellphone,ipaddr):
     try:
@@ -176,6 +186,7 @@ def registerSendSms(cellphone,ipaddr):
         futu = asyncio.ensure_future(gathers)
         futu.add_done_callback(done_callback)
         loop.run_until_complete(futu)
+        print('return is', futu.result())
         return sms_num
     except Exception as e:
         log.error(traceback.format_exc()) 
@@ -184,28 +195,71 @@ def checkRegCookie(info):
     if info == None:
         return -1 
 
-def checkNickBirth(nickname,birthday,send_sms,dbsend_sms):
-    if len(nickname) < 6 or name.isspace() == True:
-        return -1
-    if len(birthday) < 6 or password.isspace() == True:
-        return -1
-    if send_sms != dbsend_sms:
-        return -2
+def checkNickBirth(nickname,birthday,send_sms,dbsend_sms,dbsend_time):
+    try:
+        if len(nickname) < 1 or len(birthday) < 1:
+            return -1
+        if len(send_sms) != 6 or send_sms.isdigit() != True:
+            return -3
+        if int(send_sms) != int(dbsend_sms):
+            return -2
+        nowtime = int(time.time())
+        checktime = int(dbsend_time) + 1800
+        if checktime < nowtime:
+            return -4
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
 
-def SaveInfo(name,password,password2,nickname,birthday,send_sms,dbsend_sms,cellphone,gender):
-    passwdret = checkPasswd(name,password,password2)
-    if passwdret == -1:
-        return -1
-    if passwdret == -2:
-        return -2
-    if passwdret == -3:
-        return -3 
-    nickret = checkNickBirth(nickname,birthday,send_sms,dbsend_sms)  
-    if nickret == -1:
-        return -4
-    if nickret == -2:
-        return -5
-    password = hashlib.md5(password).hexdigest()
-    userinfo = Users.create( name=name, password=password, nickname=nickname,
-                             birthday=birthday, cellphone=cellphone,gender=gender)
-    return userinfo.id
+def SaveInfo(name,password,password2,nickname,birthday,send_sms,gender,info):
+    try:
+        dbsend_sms = info[1]
+        cellphone = info[0]
+        dbsend_time = info[2]
+        passwdret = checkPasswd(name,password,password2)
+        if passwdret == -1:
+            return -1
+        if passwdret == -2:
+            return -2
+        if passwdret == -3:
+            return -3
+        nickret = checkNickBirth(nickname,birthday,send_sms,dbsend_sms,dbsend_time) 
+        if nickret == -1:
+            return -4
+        if nickret == -2:
+            return -5
+        if nickret == -3:
+            return -6
+        if nickret == -4:
+            return -7
+        password = hashlib.md5(password.encode('utf8')).hexdigest()
+        userinfo = Users.create( name=name, password=password, nickname=nickname,
+                                 birthday=birthday, cellphone=cellphone,gender=gender)
+        return userinfo.id
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+
+# login
+def loginCheck(name, password):
+    try:
+        if name == '' or password == '':
+            return -1
+        dbusers = Users.select().where(Users.name == name)
+        if dbusers.count() == 0:
+            return -2
+        dbusers = Users.get(Users.name == name)
+        dbname = dbusers.name
+        dbpassword = dbusers.password
+        password = hashlib.md5(password.encode('utf8')).hexdigest()
+        if dbname != name or dbpassword != password:
+            return -3
+        import datetime
+        login_time = datetime.datetime.now()
+        cookie_num = name + ';' + '1'
+        dbusers.cookie_num = cookie_num
+        dbusers.login_time = login_time
+        dbusers.save()
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
