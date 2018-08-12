@@ -30,14 +30,17 @@ def hyperlink_3(addr,msg,addr2,msg2,addr3,msg3):
 	return u'<a href="%s"><h3>%s</h3></a> <a href="%s"><h3>%s</h3></a> <a href="%s"><h3>%s</h3></a>'%(addr,msg,addr2,msg2,addr3,msg3)
 
 def read_file(file_name):
+    try:
 	fd = open(file_name, "r")
 	ct = str(fd.read())
 	fd.close()
 	return ct
-
+    except Exception as e:
+        log.error(traceback.format_exc())
 
 # register
 def registerHtml(cellphone, send_sms):
+    try:
         h = '<html><body>'
         h = h + '<form action="/api/v1/register_add" method="post" enctype="multipart/form-data">' 
         h = h + '<fieldset>'
@@ -57,3 +60,5 @@ def registerHtml(cellphone, send_sms):
         h = h + '<p>' + '<input type="submit" value="提交"/>' + '</p>'
         h = h + '</body></html>'
         return h
+    except Exception as e:
+        log.error(traceback.format_exc())

@@ -111,7 +111,9 @@ def checkIp():
             return -1
         lis = []
         lis.append(ipaddr)
+        log.info('store_user.py checkip %s'%time_now)
         lis.append(time_now)
+        log.info('store_user.py checkip %s'%lis)
         return lis
     except Exception as e:
         log.error(traceback.format_exc())

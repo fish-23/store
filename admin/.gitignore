@@ -10,3 +10,4 @@ build
 1.text
 2.text
 __pycache__
+www/static/products/

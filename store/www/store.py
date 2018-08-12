@@ -48,23 +48,26 @@ def register():
         ret = checkIp()
         if ret == -1:
             return red_writing_1(u'每个IP每天最多接收5条短信','/',u'点击返回主页')
-        sendsmsret = registerSendSms(cellphone,ret[0])
+        #sendsmsret = registerSendSms(cellphone,ret[0])
         lis = []
         lis.append(cellphone)
         lis.append(sendsmsret)
         lis.append(ret[1])
+        log.info('register checkip send_sms is %s'%lis)
         response.set_cookie('register_info', lis, domain='www.fish-23.com', path = '/', secret = 'asf&*4561')
         redirect('/register_add')
 
 @app.route('/register_add')
 def register_add():
         info = request.get_cookie('register_info', secret = 'asf&*4561')
+        log.info('register_add  info is %s'%info)
         register_add_html = read_file('templates/register_add.html')
         return register_add_html
         
 @app.route('/api/v1/register_add', method="post")
 def register_add():
         info = request.get_cookie('register_info', secret = 'asf&*4561')
+        log.info('/api/v1/register_add  info is %s'%info)
         if checkRegCookie(info) == -1:
             return red_writing_1(u'注册异常，异常的访问方式','/register',u'点击重新注册')
         name = request.forms.get('name')
