@@ -31,3 +31,5 @@
                   except:bValid = False  print(bValid)  # True
            方法三：第三方库pillow，读取file对象 pic = pic.file  bValid = True  try:Image.open(pic).verify() 
                   except:bValid = False  print(bValid)  # True
+### 11，peewee.InternalError: (1054, "Unknown column 't2.id' in 'where clause'")
+      解答：在查询语句中去掉外键关联的id
