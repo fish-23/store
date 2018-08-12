@@ -271,25 +271,24 @@ def loginCheck(name, password):
 def productInfo(name):
     try:
         print(name)  
-        from store_view import productListHtml,productListJoinHtml
+        #from store_view import productListHtml,productListJoinHtml
         categories = Categories.select().where(Categories.parent_name == '产品')
         categories_id = [i.id for i in categories]
         categories_name = [i.name for i in categories]
         categories_info = zip(categories_id, categories_name)
         h = ''
-        if 1==1:
-            for k in categories_info:
-                i = k[0]
-                j = k[1]               
-                if name =='none':
-                    productret = Products.select().where(Products.category == i)
-                else:
-                    productret = Products.select().where(Products.category == i, Products.name % '%{}%'.format(name))
-                    count = productret.count()
-                    if count == 0:
-                        continue
-                html = productListHtml(productret,j)
-                h = h + html
+        for k in categories_info:
+            i = k[0]
+            j = k[1]               
+            if name =='none':
+                productret = Products.select().where(Products.category == i)
+            else:
+                productret = Products.select().where(Products.category == i, Products.name % '%{}%'.format(name))
+                count = productret.count()
+                if count == 0:
+                    continue
+            html = productListHtml(productret,j)
+            h = h + html
         return productListJoinHtml(h) 
     except Exception as e:
         log.error(traceback.format_exc())
@@ -300,3 +299,12 @@ def productSearch(name):
             return -1 
     except Exception as e:
         log.error(traceback.format_exc())
+
+def productDetails(nid):
+    try:
+        productret = Products.get(Products.id == nid)
+        parameterret = ProductParameters.select().where(ProductParameters.product == nid)
+        return productDetailsHtml(productret)
+    except Exception as e:
+        log.error(traceback.format_exc())
+

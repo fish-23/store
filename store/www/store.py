@@ -148,6 +148,11 @@ def product_list():
         if searchret == -1:
            redirect('/product_list/none') 
         redirect('/product_list/%s'%name)
+
+@app.route('/product_details/<nid>')
+def product_list(nid):
+        h = productDetails(nid)
+        return h
                 
 
 # 购物车
