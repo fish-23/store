@@ -129,13 +129,26 @@ def login():
         if loginret == -3:
             return red_writing_1(u'用户名密码不正确','/login',u'点击重新登录')
         response.set_cookie('login_name', name, domain='www.fish-23.com', path = '/', secret = 'asf&*181183')
-        redirect('/product_list')
+        redirect('/product_list/none')
 
 
 # 商品分类
-@app.route('/product_list')
-def product_list():  
-        return red_writing_1(u'功能开发中','/',u'点击返回')   
+@app.route('/product_list/<name>')
+def product_list(name):  
+        ipaddr = request.headers.get('X-Real-IP3')
+        log.info('store product_list ip is %s'%ipaddr)
+        h = productInfo(name)
+        return h
+
+@app.route("/api/v1/product_list", method="post")
+def product_list():
+        name = request.forms.get('name')
+        name = name.strip()
+        searchret = productSearch(name)
+        if searchret == -1:
+           redirect('/product_list/none') 
+        redirect('/product_list/%s'%name)
+                
 
 # 购物车
 @app.route('/shopping_cart')
