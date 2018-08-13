@@ -48,7 +48,7 @@ def register():
         ret = checkIp()
         if ret == -1:
             return red_writing_1(u'每个IP每天最多接收5条短信','/',u'点击返回主页')
-        #sendsmsret = registerSendSms(cellphone,ret[0])
+        sendsmsret = registerSendSms(cellphone,ret[0])
         lis = []
         lis.append(cellphone)
         lis.append(sendsmsret)
@@ -129,7 +129,7 @@ def login():
         if loginret == -3:
             return red_writing_1(u'用户名密码不正确','/login',u'点击重新登录')
         response.set_cookie('login_name', name, domain='www.fish-23.com', path = '/', secret = 'asf&*181183')
-        redirect('/product_list/none')
+        redirect('/')
 
 
 # 商品分类
@@ -150,10 +150,30 @@ def product_list():
         redirect('/product_list/%s'%name)
 
 @app.route('/product_details/<nid>')
-def product_list(nid):
+def product_details(nid):
         h = productDetails(nid)
         return h
-                
+
+@app.route("/api/v1/product_details", method="post")
+def product_details():
+        order_now = request.forms.get('buy')
+        shopping_cart = request.forms.get('cart')
+        parameter_id = request.forms.get('parameter')
+        product_id = request.forms.get('html_nid')
+        buy_num = request.forms.get('buynum')
+        buy_num = buy_num.strip()
+        checkret = checkDetailsInfo(order_now,shopping_cart,parameter_id,buy_num)      
+        if checkret == -1:
+            return red_writing_1(u'购买数量不能为空','/product_details/%s'%product_id,u'点击返回')
+        if checkret == -2:
+            return red_writing_1(u'购买数量只能是纯数字，大于1小于100','/product_details/%s'%product_id,u'点击返回')
+        if checkret == -3:
+            return red_writing_1(u'请选择需要购买的规格','/product_details/%s'%product_id,u'点击返回')
+        if checkret == -4:
+            return '商品加入购物车'
+        if checkret == -5:
+            return '商品立即购买'
+
 
 # 购物车
 @app.route('/shopping_cart')

@@ -304,7 +304,23 @@ def productDetails(nid):
     try:
         productret = Products.get(Products.id == nid)
         parameterret = ProductParameters.select().where(ProductParameters.product == nid)
-        return productDetailsHtml(productret)
+        return productDetailsHtml(productret, parameterret)
     except Exception as e:
         log.error(traceback.format_exc())
 
+def checkDetailsInfo(order_now,shopping_cart,parameter_id,buy_num):
+    try:
+        if buy_num == '':
+            return -1
+        if  buy_num.isnumeric() == False:
+            return -2
+        if int(buy_num)<1 or int(buy_num)>100:
+            return -2
+        if parameter_id == None:
+            return -3
+        if order_now == None:
+            return -4
+        if shopping_cart == None:
+            return -5
+    except Exception as e:
+        log.error(traceback.format_exc())

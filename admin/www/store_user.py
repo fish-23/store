@@ -221,9 +221,11 @@ def delUser(html_nid):
     try:
         userret = Users.get(Users.id == html_nid)
         name = userret.name
+        avaturaddr = userret.avaturaddr
         if name == 'admin':
             return -1
         userret.delete_instance() 
+        os.system('rm -rf %s'%avaturaddr)        
         return 0
     except Exception as e:
         log.error(traceback.format_exc())

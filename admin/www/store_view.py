@@ -1,7 +1,9 @@
 ﻿#!/usr/local/python3
 # -*- coding: UTF-8 -*-
 
-import time,datetime,io
+import time,datetime
+import io
+import traceback
 from PIL import Image
 import sys
 sys.path.append('/root')

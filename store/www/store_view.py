@@ -103,35 +103,40 @@ def productListJoinHtml(h):
 def productDetailsHtml(productret,parameterret):
     try:
         h = u'<html><body>'
+        h = h + '<form action="/api/v1/product_details" method="post" enctype="multipart/form-data">'
         h = h + '<font color="red">' + '<h3>' + '产品信息' + '</h3>'  + '</font>'
-        for i in ret:
-            html_nid = i.id
-            html_name = i.name
-            html_price = i.price
-            html_discount  = i.discount
-            html_num  = i.num
-            html_description  = i.description
-            html_picaddr  = i.picaddr
-            html_thumbnail = i.thumbnail
-            html_category = i.category.name
-            html_createdtime  = i.created_time
-            html_createdtime = str(html_createdtime)
-            html_createdtime = html_createdtime[:10]
-            h = h + '<font>' + '产品分类：' + html_category + '</font>' + display_space
-            h = h + '<font>' + '产品名称：' + html_name + '</font>' + display_space
-            h = h + '<font>' + '产品价格：' + str(html_price) + '</font>' + display_space
-            h = h + '<font>' + '折扣价格：' + str(html_discount) + '</font>' + '<br>'
-            h = h + '<br>' +  '<font>' + '库存余量：' + str(html_num) + '</font>' + display_space
-            h = h + '<font>' + '产品详情：' + html_description + '</font>' +  '<br>'
-            h = h + '<br>' + '产品缩略图：' + '<img src="data:image/jpg;base64,%s"/>'%html_thumbnail + '<br>'
-            h = h + '<br>' + '<a href="/parameters_list/' + str(html_nid) + u'">产品规格</a>' + display_space
-            h = h + '<a href="/product_del/' + str(html_nid) + u'">删除</a>' + display_space
-            h = h + '<a href="/product_modify/' + str(html_nid) + u'">修改</a ><br>'
-        welcome = u'<fieldset><legend><h2>产品列表</h2></legend>'
+        html_nid = productret.id
+        html_name = productret.name
+        html_price = productret.price
+        html_discount  = productret.discount
+        html_num  = productret.num
+        html_description  = productret.description
+        html_thumbnail = productret.thumbnail
+        html_category = productret.category.name
+        h = h + '<input type="hidden" name="html_nid" value="%s">'%html_nid
+        h = h + '<font>' + '产品分类：' + html_category + '</font>' + display_space
+        h = h + '<font>' + '产品名称：' + html_name + '</font>' + display_space
+        h = h + '<font>' + '产品详情：' + html_description + '</font>' +  '<br>'
+        h = h + '<br>' + '产品缩略图：' + '<img src="data:image/jpg;base64,%s"/>'%html_thumbnail + '<br>' 
+        h = h + '<font color="red">' + '<h3>' + '规格信息' + '</h3>'  + '</font>'       
+        for i in parameterret:
+            nid = i.id
+            price = i.price
+            discount  = i.discount
+            num  = i.num
+            description  = i.description
+            h = h + '<font>' + '规格选择：' + '<input type="Radio" name="parameter" value="%s">'%nid + display_space
+            h = h + '<font>' + '价格：' + str(discount) + '</font>' + display_space
+            h = h + '<font>' + '库存：' + str(num) + '</font>' + display_space 
+            h = h + '<font>' + '描述：' + description + '</font>' + display_space+ '<br>'
+        welcome = u'<fieldset><legend><h2>产品详情</h2></legend>'
         entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-        add_link = u'<br> <a href="/product_add">点击添加</a ><body></html>'
+        cart_info = '<input type="submit" name="cart" value="加入购物车"/>' + '<br>' + '<br>'
+        buy_info = '<input type="submit" name="buy" value="立即购买"/>'
+        num_info= '<br>' + '购买数量' + '<input type="text" name="buynum">' + '<br>'
         index_link = u'<a href="/">点击返回主页</a ><body></html>'+ '<br>'
-        h = welcome+ h + '<br>' + add_link + display_space + index_link + entry_time
+        product_link = u'<a href="/product_list/none">点击返回产品列表</a ><body></html>' + display_space
+        h = welcome + h + num_info + buy_info + display_space + cart_info + product_link  + index_link + entry_time
         return h
     except Exception as e:
         log.error(traceback.format_exc())
