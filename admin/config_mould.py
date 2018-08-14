@@ -12,9 +12,9 @@ MYDATABASE = '数据库库名(admin)'
 MYDATABASES = '数据库库名(store)'
 
 # 腾讯云SMS
-SMSAPPID =  腾讯云SMS ID
+SMSAPPID =  '腾讯云SMS ID'
 SMSAPPKEY = '腾讯云SMS 秘钥'
-TEMPLATE_ID = 短信模板ID
+TEMPLATE_ID = '短信模板ID'
 PHONE = ['调试用的手机号']
 
 # 图片存储

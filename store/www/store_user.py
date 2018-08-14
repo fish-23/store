@@ -266,6 +266,28 @@ def loginCheck(name, password):
     except Exception as e:
         log.error(traceback.format_exc())
 
+def checkLogin(login_name):
+    try:
+        if login_name == None:
+            return -1
+        user_ret = Users.get(Users.name == login_name)
+        db_cookie_num = user_ret.cookie_num
+        db_login_time = user_ret.login_time
+        cookie_num = login_name + ';' + '1'
+        if db_cookie_num != cookie_num:
+            return -1
+        time_now = int(time.time())
+        db_login_time = str(db_login_time)
+        db_login_time = time.strptime(db_login_time, "%Y-%m-%d %H:%M:%S")
+        db_login_time = int(time.mktime(db_login_time)) 
+        check_time = time_now - db_login_time
+        if check_time > 86400:
+            user_ret.cookie_num = login_name + ';' + '2'
+            user_ret.save()
+            return -1
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
 
 # 产品
 def productInfo(name):

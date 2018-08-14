@@ -157,7 +157,10 @@ def product_details(nid):
 @app.route("/api/v1/product_details", method="post")
 def product_details():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        
+        print('111111111111')
+        print(login_name)
+        if checkLogin(login_name) == -1:
+            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')    
         order_now = request.forms.get('buy')
         shopping_cart = request.forms.get('cart')
         parameter_id = request.forms.get('parameter')
