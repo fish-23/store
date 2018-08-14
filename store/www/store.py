@@ -156,6 +156,8 @@ def product_details(nid):
 
 @app.route("/api/v1/product_details", method="post")
 def product_details():
+        login_name = request.get_cookie('login_name', secret = 'asf&*181183')
+        
         order_now = request.forms.get('buy')
         shopping_cart = request.forms.get('cart')
         parameter_id = request.forms.get('parameter')

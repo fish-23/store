@@ -270,8 +270,6 @@ def loginCheck(name, password):
 # 产品
 def productInfo(name):
     try:
-        print(name)  
-        #from store_view import productListHtml,productListJoinHtml
         categories = Categories.select().where(Categories.parent_name == '产品')
         categories_id = [i.id for i in categories]
         categories_name = [i.name for i in categories]
