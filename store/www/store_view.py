@@ -141,3 +141,34 @@ def productDetailsHtml(productret,parameterret):
     except Exception as e:
         log.error(traceback.format_exc())
 
+
+# shopping_cart
+def cartHtml(cart_info):        
+    try:
+        h = u'<html><body>'
+        display_space = '&nbsp'*6
+        price = 0
+        for i in cart_info:
+            html_nid = i.id
+            html_name = i.product.name
+            html_thumbnail = i.product.thumbnail            
+            html_discount = i.product_parameters.discount
+            html_description  = i.product_parameters.description
+            html_num = i.num
+            price = price + int(html_discount)*int(html_num)
+            h = h + '<img src="data:image/jpg;base64,%s"/>'%html_thumbnail + display_space
+            h = h + '<font>' + '名称：' + html_name + '</font>' + display_space
+            h = h + '<font>' + '价格：' + str(html_discount) + '</font>' + display_space
+            h = h + '<font>' + '规格描述：' + html_description + '</font>' + display_space
+            h = h + '<font>' + '购买数量：' + str(html_num) + '</font>' + display_space
+            h = h + '<a href="/shopping_cart_del/' + str(html_nid) + u'">删除</a>' + '<br>'
+        welcome = u'<fieldset><legend><h2>购物车</h2></legend>'
+        entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        product_link =  u'<a href="/product_list/none">产品列表</a ><body></html>'
+        price_all = '<br>' + '<br>' +'<font color="red">' +'<h3>' + '产品总价：' + str(price) + '</font>' + display_space
+        payment = u'<a href="/create_transaction">去结算</a ><body></html>' + '</h3>' 
+        index_link = u'<a href="/">返回主页</a ><body></html>' + '<br>'
+        h = welcome+ h + price_all + payment + product_link + display_space + index_link + entry_time
+        return h        
+    except Exception as e:
+        log.error(traceback.format_exc()) 

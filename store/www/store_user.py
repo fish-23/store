@@ -271,8 +271,6 @@ def loginCheck(name, password):
 
 def checkLogin(login_name):
     try:
-        print('1111111')
-        print(login_name)
         if login_name == None:
             return -1
         user_ret = Users.select().where(Users.name == login_name)
@@ -371,5 +369,27 @@ def shoppingCartAdd(product_id,parameter_id,buy_num,login_name):
             num_info.num = num
             num_info.save()
         return 1
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+def cartInfo(login_name):         
+    try:
+        user_info = Users.get(Users.name == login_name)
+        user_id = user_info.id
+        cart_info = ShoppingCart.select().where(ShoppingCart.users == user_id).order_by(ShoppingCart.product)
+        return cartHtml(cart_info)
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+def cartDel(login_name,nid):
+    try:
+        user_info = Users.get(Users.name == login_name)
+        user_id = user_info.id
+        cart_info = ShoppingCart.get(ShoppingCart.id == nid)
+        cart_user = cart_info.users.id
+        if int(user_id) != int(cart_user):
+            return -1
+        cart_info.delete_instance()
+        return 0 
     except Exception as e:
         log.error(traceback.format_exc())

@@ -185,7 +185,29 @@ def product_details():
 # 购物车
 @app.route('/shopping_cart')
 def shopping_cart():
-        return red_writing_1(u'功能开发中','/',u'点击返回')
+        login_name = request.get_cookie('login_name', secret = 'asf&*181183')
+        checkret = checkLogin(login_name)
+        if checkret == -1:
+            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
+        if checkret == -2:
+            return red_writing_1(u'用户不存在', '/register',u'点击注册')        
+        h = cartInfo(login_name)
+        return h
+
+@app.route('/shopping_cart_del/<nid>')
+def shopping_cart_del(nid):
+        login_name = request.get_cookie('login_name', secret = 'asf&*181183')
+        checkret = checkLogin(login_name)
+        if checkret == -1:
+            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
+        if checkret == -2:
+            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        del_ret = cartDel(login_name,nid)        
+        if del_ret == -1:
+            return red_writing_1(u'只能删除自己的购物车产品', '/shopping_cart',u'点击返回')
+        redirect('/shopping_cart')
+
+
 
 # 个人中心
 @app.route('/user_list')
