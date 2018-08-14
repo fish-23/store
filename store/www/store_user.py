@@ -29,6 +29,7 @@ from models.settings import *
 from models.categories import *
 from models.groups import *
 from models.ips import *
+from models.shopping_cart import *
 
 # 图片检测
 def checkPic(pic):
@@ -95,8 +96,10 @@ def recordImage(picaddr,pic, nid):
 # ip检测
 def checkIp():
     try:
+        print('checkip')
         ipaddr = request.headers.get('X-Real-IP3')
         time_now = int(time.time())
+        print('time_now is', time_now)
         dbip = Ips.select().where(Ips.ipaddr == ipaddr)
         if dbip.count() == 0:
             Ips.create(ipaddr=ipaddr, sendsms_time=time_now)
@@ -268,8 +271,13 @@ def loginCheck(name, password):
 
 def checkLogin(login_name):
     try:
+        print('1111111')
+        print(login_name)
         if login_name == None:
             return -1
+        user_ret = Users.select().where(Users.name == login_name)
+        if user_ret.count() == 0:
+            return -2
         user_ret = Users.get(Users.name == login_name)
         db_cookie_num = user_ret.cookie_num
         db_login_time = user_ret.login_time
@@ -289,7 +297,7 @@ def checkLogin(login_name):
     except Exception as e:
         log.error(traceback.format_exc())
 
-# 产品
+# product
 def productInfo(name):
     try:
         categories = Categories.select().where(Categories.parent_name == '产品')
@@ -328,7 +336,7 @@ def productDetails(nid):
     except Exception as e:
         log.error(traceback.format_exc())
 
-def checkDetailsInfo(order_now,shopping_cart,parameter_id,buy_num):
+def checkDetailsInfo(order_now,shopping_cart,product_id,parameter_id,buy_num,login_name):
     try:
         if buy_num == '':
             return -1
@@ -338,9 +346,30 @@ def checkDetailsInfo(order_now,shopping_cart,parameter_id,buy_num):
             return -2
         if parameter_id == None:
             return -3
-        if order_now == None:
-            return -4
-        if shopping_cart == None:
+        if order_now == '立即购买':
             return -5
+        if str(shopping_cart) == '加入购物车':
+            return shoppingCartAdd(product_id,parameter_id,buy_num,login_name)
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+
+# shopping_cart
+def shoppingCartAdd(product_id,parameter_id,buy_num,login_name):
+    try:
+        shopping_info = ShoppingCart.select().where(ShoppingCart.product_parameters==parameter_id)
+        user_info = Users.get(Users.name == login_name)
+        user_id = user_info.id 
+        if shopping_info.count() == 0:
+            ShoppingCart.create(num=buy_num, product_parameters=parameter_id, 
+                                product=product_id,users=user_id)
+        else:
+            num_info = ShoppingCart.get(ShoppingCart.product_parameters==parameter_id)
+            db_num = num_info.num
+            num = int(db_num) + int(buy_num)
+            num_info.num = num
+            num_info.save()
+        return 1
     except Exception as e:
         log.error(traceback.format_exc())

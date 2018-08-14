@@ -48,6 +48,8 @@ def register():
         ret = checkIp()
         if ret == -1:
             return red_writing_1(u'每个IP每天最多接收5条短信','/',u'点击返回主页')
+        print('checkip checkip checkip')
+        print('checkip random time  is', ret)
         sendsmsret = registerSendSms(cellphone,ret[0])
         lis = []
         lis.append(cellphone)
@@ -157,25 +159,25 @@ def product_details(nid):
 @app.route("/api/v1/product_details", method="post")
 def product_details():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        print('111111111111')
-        print(login_name)
         if checkLogin(login_name) == -1:
-            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')    
+            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
+        if checkLogin(login_name) == -2:
+            return red_writing_1(u'用户不存在', '/register',u'点击注册')    
         order_now = request.forms.get('buy')
         shopping_cart = request.forms.get('cart')
         parameter_id = request.forms.get('parameter')
         product_id = request.forms.get('html_nid')
         buy_num = request.forms.get('buynum')
         buy_num = buy_num.strip()
-        checkret = checkDetailsInfo(order_now,shopping_cart,parameter_id,buy_num)      
+        checkret = checkDetailsInfo(order_now,shopping_cart,product_id,parameter_id,buy_num,login_name) 
         if checkret == -1:
             return red_writing_1(u'购买数量不能为空','/product_details/%s'%product_id,u'点击返回')
         if checkret == -2:
             return red_writing_1(u'购买数量只能是纯数字，大于1小于100','/product_details/%s'%product_id,u'点击返回')
         if checkret == -3:
             return red_writing_1(u'请选择需要购买的规格','/product_details/%s'%product_id,u'点击返回')
-        if checkret == -4:
-            return '商品加入购物车'
+        if checkret == 1:
+            return red_writing_2(u'加入购物车成功','/product_list/none',u'点击继续购买','/shopping_cart',u'点击进入购物车')
         if checkret == -5:
             return '商品立即购买'
 

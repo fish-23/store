@@ -9,6 +9,7 @@ from models.groups import *
 from models.product_parameters import *
 from models.settings import *
 from models.ips import *
+from models.shopping_cart import *
 
 import sys
 sys.path.append('/root')
@@ -24,7 +25,8 @@ def createTables():
          Groups,
          ProductParameters,
          Settings,
-         Ips
+         Ips,
+         ShoppingCart
          ] 
     db.create_tables(tables)
 
