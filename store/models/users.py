@@ -19,7 +19,7 @@ class Users(BaseModel):
     # 用户头像
     avatur = TextField(null=True) 
     # 头像地址
-    avaturaddr = TextField(null=True)   
+    avaturaddr = TextField(null=True)    
     # 余额
     balance = FloatField(default=.0)
     # 积分
@@ -28,6 +28,8 @@ class Users(BaseModel):
     gender = CharField(null=True)
     # 出生日期
     birthday = CharField(null=True)
+    # 删除状态(0未删除，-1已删除)
+    del_status = IntegerField(default=0)
     # 最后登录时间
     login_time = DateTimeField(null=True)   
     # 邮件发送时间

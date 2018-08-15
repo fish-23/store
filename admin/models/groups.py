@@ -17,7 +17,9 @@ class Groups(BaseModel):
     # 地址
     address = TextField(null=True)
     # 服务热线
-    phone = CharField(null=True)    
+    phone = CharField(null=True) 
+    # 删除状态(0未删除，-1已删除)
+    del_status = IntegerField(default=0)   
     # 分类
     category = ForeignKeyField(Categories, related_name='category_groups', on_delete='CASCADE')
     # 拥有者

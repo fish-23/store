@@ -21,7 +21,9 @@ class Products(BaseModel):
     # 产品缩略图
     thumbnail = TextField(null=True)
     # 原图地址
-    picaddr = TextField(null=True)   
+    picaddr = TextField(null=True) 
+    # 删除状态(0未删除，-1已删除)
+    del_status = IntegerField(default=0)  
     # 产品创建时间
     created_time = DateTimeField(default=datetime.now)
     # 所属分类

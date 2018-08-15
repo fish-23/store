@@ -148,7 +148,8 @@ def saveProduct(name, num, price, discount, description, user_name, category):
 
 def findProduct(name):
     try:
-        owner_id = Users.select(Users.id).where(Users.name == name)
+        owner_info = Users.get(Users.name == name)
+        owner_id = owner_info.id
         group = Groups.get(Groups.owner == owner_id)
         group_id = group.id
         ret = Products.select().where(Products.group== group_id).order_by(Products.category,Products.id.desc())

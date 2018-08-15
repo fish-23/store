@@ -19,4 +19,3 @@ class ShoppingCart(BaseModel):
     users = ForeignKeyField(Users, related_name='cart_users', on_delete='CASCADE')
     # 加入时间
     created_time = DateTimeField(default=datetime.now)
-

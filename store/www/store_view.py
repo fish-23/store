@@ -147,27 +147,42 @@ def cartHtml(cart_info):
     try:
         h = u'<html><body>'
         display_space = '&nbsp'*6
+        lis = []
         price = 0
         for i in cart_info:
+            dic = {}
             html_nid = i.id
             html_name = i.product.name
             html_thumbnail = i.product.thumbnail            
             html_discount = i.product_parameters.discount
             html_description  = i.product_parameters.description
             html_num = i.num
-            price = price + int(html_discount)*int(html_num)
+            parameter_price = int(html_discount)*int(html_num)
+            price = price + parameter_price
+            dic['nid'] = html_nid
+            dic['name'] = html_name
+            dic['thumbnail'] = html_thumbnail
+            dic['discount'] = html_discount
+            dic['description'] = html_description
+            dic['num'] = html_num
+            dic['parameter_price'] = parameter_price
+            lis.append(dic)
             h = h + '<img src="data:image/jpg;base64,%s"/>'%html_thumbnail + display_space
             h = h + '<font>' + '名称：' + html_name + '</font>' + display_space
             h = h + '<font>' + '价格：' + str(html_discount) + '</font>' + display_space
-            h = h + '<font>' + '规格描述：' + html_description + '</font>' + display_space
-            h = h + '<font>' + '购买数量：' + str(html_num) + '</font>' + display_space
+            h = h + '<font>' + '规格描述' + html_description + '</font>' + display_space
+            h = h + '<font>' + '购买数量' + str(html_num) + '</font>' + display_space
             h = h + '<a href="/shopping_cart_del/' + str(html_nid) + u'">删除</a>' + '<br>'
+        dic = {}
+        dic['price'] = price
+        dic['shoping_cart'] = 0
+        lis.append(dic)
         welcome = u'<fieldset><legend><h2>购物车</h2></legend>'
         entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         product_link =  u'<a href="/product_list/none">产品列表</a ><body></html>'
         price_all = '<br>' + '<br>' +'<font color="red">' +'<h3>' + '产品总价：' + str(price) + '</font>' + display_space
-        payment = u'<a href="/create_transaction">去结算</a ><body></html>' + '</h3>' 
-        index_link = u'<a href="/">返回主页</a ><body></html>' + '<br>'
+        payment = u'<a href="/create_transaction/' + str(lis) + u'">去结算</a ><body></html>'+ '</h3>'
+        index_link = u'<a href="/">返回主页</a ><body></html>'+ '<br>'
         h = welcome+ h + price_all + payment + product_link + display_space + index_link + entry_time
         return h        
     except Exception as e:

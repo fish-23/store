@@ -15,6 +15,8 @@ class ProductParameters(BaseModel):
     description = TextField(null=True)
     # 库存
     num = IntegerField(default = 0)
+    # 删除状态(0未删除，-1已删除)
+    del_status = IntegerField(default=0)
     # 规格创建时间
     created_time = DateTimeField(default=datetime.now)    
     # 产品参数所属产品
