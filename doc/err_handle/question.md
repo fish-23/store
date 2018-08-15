@@ -33,3 +33,14 @@
                   except:bValid = False  print(bValid)  # True
 ### 11，peewee.InternalError: (1054, "Unknown column 't2.id' in 'where clause'")
       解答：在查询语句中去掉外键关联的id
+### 12，peewee中店铺表和用户表用外键关联，什么时候用.id 什么时候不用
+      解答：（1）通过店铺id查用户信息时，不用.id  user_info = Users.select().where(Users.groups == groups_id) 这对应的是店铺表id这一列
+            (2) 通过用户信息，获取店铺id时，要用.id  user_info = Users.get(Users.name == login_name)
+                (1) group_id = user_info.groups  这样获取的结果，打印出来是1，类型是<Model: Users> 它代表的是店铺表id=1对应的信息
+                (2) group_id = user_info.groups.id 这样获取的结果，打印出来是1，类型是<int> 他表示的是店铺表这条信息对应的id
+### 13，varchar类型选择
+      解答：设置字段类型为varchar类型时，向这个字段存数据，最多只能存储50个英文字符
+### 14，两个表什么时候用外键关联，什么时候用字段存id进行联系
+      解答：这个要看两个表的关系。如果主表变化，从表也需要变化，用外键。如果从表不需要变化，用字段
+           例如，产品和产品规格两个表，当产品删除时，产品规格也应被删除，这两个表用外键，删除设置成主表删除从表删除
+           例如，订单和收货信息两张表，收获信息被删除，已完成的订单不受影响，这时候，就应该在订单表中用字段存收货信息的id
