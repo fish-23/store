@@ -78,10 +78,10 @@ def productListHtml(ret,categories_name):
             html_discount  = i.discount
             html_thumbnail = i.thumbnail
             html_category = i.category.name
-            h = h + '<img src="data:image/jpg;base64,%s"/>'%html_thumbnail + display_space
+            h = h + '<h4>' +'<img src="data:image/jpg;base64,%s"/>'%html_thumbnail + display_space
             h = h + '<font>' + '名称：' + html_name + '</font>' + display_space
             h = h + '<font>' + '价格：' + str(html_discount) + '</font>' + display_space
-            h = h + '<a href="/product_details/' + str(html_nid) + u'">产品详情</a>' + '<br>'
+            h = h + '<a href="/product_details/' + str(html_nid) + u'">产品详情</a>' + '</h4>'
         h = h + '<br>'
         return h                
     except Exception as e:
@@ -90,12 +90,12 @@ def productListHtml(ret,categories_name):
 def productListJoinHtml(h):
     try:
         welcome = u'<fieldset><legend><h2>产品列表</h2></legend>'
-        entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-        index_link = u'<a href="/">点击返回主页</a ><body></html>' + '<br>'
+        entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))+'</h4>'
+        index_link = '<h4>' + u'<a href="/">点击返回主页</a ><body></html>' + '<br>'
         search_link = '<form action="/api/v1/product_list" method="post">'
         search_link = search_link + '<font color="red"><h3>' + '产品名：' + '<input type="text" name="name"/>' 
         search_link = search_link + '<input type="submit" value="搜索"/>' + '</h3></font>' +'</form>' 
-        h = welcome + search_link + h + '<br>' + '<br>' + index_link + entry_time
+        h = welcome + search_link + h + '<br>' + index_link + entry_time
         return h
     except Exception as e:
         log.error(traceback.format_exc())
@@ -113,11 +113,11 @@ def productDetailsHtml(productret,parameterret):
         html_description  = productret.description
         html_thumbnail = productret.thumbnail
         html_category = productret.category.name
-        h = h + '<input type="hidden" name="html_nid" value="%s">'%html_nid
+        h = h + '<h4>' + '<input type="hidden" name="html_nid" value="%s">'%html_nid
         h = h + '<font>' + '产品分类：' + html_category + '</font>' + display_space
         h = h + '<font>' + '产品名称：' + html_name + '</font>' + display_space
         h = h + '<font>' + '产品详情：' + html_description + '</font>' +  '<br>'
-        h = h + '<br>' + '产品缩略图：' + '<img src="data:image/jpg;base64,%s"/>'%html_thumbnail + '<br>' 
+        h = h + '<br>' + '产品缩略图：' + '<img src="data:image/jpg;base64,%s"/>'%html_thumbnail + '</h4>' + '<br>' 
         h = h + '<font color="red">' + '<h3>' + '规格信息' + '</h3>'  + '</font>'       
         for i in parameterret:
             nid = i.id
@@ -125,15 +125,16 @@ def productDetailsHtml(productret,parameterret):
             discount  = i.discount
             num  = i.num
             description  = i.description
+            h = h + '<h4>'
             h = h + '<font>' + '规格选择：' + '<input type="Radio" name="parameter" value="%s">'%nid + display_space
             h = h + '<font>' + '价格：' + str(discount) + '</font>' + display_space
             h = h + '<font>' + '库存：' + str(num) + '</font>' + display_space 
-            h = h + '<font>' + '描述：' + description + '</font>' + display_space+ '<br>'
+            h = h + '<font>' + '描述：' + description + '</font>' + display_space 
         welcome = u'<fieldset><legend><h2>产品详情</h2></legend>'
-        entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))+'</h4>'
         cart_info = '<input type="submit" name="cart" value="加入购物车"/>' + '<br>' + '<br>'
         buy_info = '<input type="submit" name="buy" value="立即购买"/>'
-        num_info= '<br>' + '购买数量' + '<input type="text" name="buynum">' + '<br>'
+        num_info= '<br>' + '<br>' + '<br>' +'购买数量：' + '<input type="text" name="buynum">' + '<br>'
         index_link = u'<a href="/">点击返回主页</a ><body></html>'+ '<br>'
         product_link = u'<a href="/product_list/none">点击返回产品列表</a ><body></html>' + display_space
         h = welcome + h + num_info + buy_info + display_space + cart_info + product_link  + index_link + entry_time
@@ -143,23 +144,30 @@ def productDetailsHtml(productret,parameterret):
 
 
 # shopping_cart
-def cartHtml(cart_info):        
+def cartHtml(cart_info,carriage_info):        
     try:
         h = u'<html><body>'
+        h = h + '<form action="/api/v1/transaction_details" method="post" enctype="multipart/form-data">' + '<h4>'
         display_space = '&nbsp'*6
         lis = []
         price = 0
+        money_full = int(carriage_info.name)
+        carriage = int(carriage_info.value)
         for i in cart_info:
             dic = {}
             html_nid = i.id
+            product_id = i.product.id
             html_name = i.product.name
-            html_thumbnail = i.product.thumbnail            
+            html_thumbnail = i.product.thumbnail        
+            parameter_id = i.product_parameters.id    
             html_discount = i.product_parameters.discount
             html_description  = i.product_parameters.description
             html_num = i.num
-            parameter_price = int(html_discount)*int(html_num)
+            parameter_price = float(html_discount)*int(html_num)
             price = price + parameter_price
-            dic['nid'] = html_nid
+            dic['cart_nid'] = html_nid
+            dic['product_id'] = product_id
+            dic['parameter_id'] = parameter_id
             dic['name'] = html_name
             dic['thumbnail'] = html_thumbnail
             dic['discount'] = html_discount
@@ -170,20 +178,30 @@ def cartHtml(cart_info):
             h = h + '<img src="data:image/jpg;base64,%s"/>'%html_thumbnail + display_space
             h = h + '<font>' + '名称：' + html_name + '</font>' + display_space
             h = h + '<font>' + '价格：' + str(html_discount) + '</font>' + display_space
-            h = h + '<font>' + '规格描述' + html_description + '</font>' + display_space
-            h = h + '<font>' + '购买数量' + str(html_num) + '</font>' + display_space
+            h = h + '<font>' + '规格描述：' + html_description + '</font>' + display_space
+            h = h + '<font>' + '购买数量：' + str(html_num) + '</font>' + display_space
             h = h + '<a href="/shopping_cart_del/' + str(html_nid) + u'">删除</a>' + '<br>'
+        if price > money_full:
+            carriage = 0
+        else:
+            carriage = carriage
+        total_price = price + carriage
         dic = {}
+        dic['carriage'] = carriage
         dic['price'] = price
+        dic['total_price'] = total_price
         dic['shoping_cart'] = 0
         lis.append(dic)
+        h = h + '<input type="hidden" name="lis" value="%s">'%lis + '</h4>'
         welcome = u'<fieldset><legend><h2>购物车</h2></legend>'
-        entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-        product_link =  u'<a href="/product_list/none">产品列表</a ><body></html>'
-        price_all = '<br>' + '<br>' +'<font color="red">' +'<h3>' + '产品总价：' + str(price) + '</font>' + display_space
-        payment = u'<a href="/create_transaction/' + str(lis) + u'">去结算</a ><body></html>'+ '</h3>'
+        entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())) + '</h4>'
+        product_link = '<h4>' + u'<a href="/product_list/none">产品列表</a ><body></html>'
+        price_all = '<br>' + '<br>' +'<font color="red">' +'<h3>' + '商品价格：' + str(price) + '</font>' + display_space
+        carriage = '<font color="red">'  + '运费：' + str(carriage) + '</font>' + display_space
+        total_price = '<font color="red">'  + '总价：' + str(total_price) + '</font>' + display_space
+        payment = '<input type="submit" name="buy" value="去结算"/>'+ '</h3>' + '<br>'
         index_link = u'<a href="/">返回主页</a ><body></html>'+ '<br>'
-        h = welcome+ h + price_all + payment + product_link + display_space + index_link + entry_time
+        h = welcome+ h + price_all + carriage + total_price  + payment + product_link + display_space + index_link + entry_time
         return h        
     except Exception as e:
         log.error(traceback.format_exc()) 

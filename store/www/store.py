@@ -177,11 +177,6 @@ def product_details():
             return '商品立即购买'
 
 
-            return red_writing_2(u'加入购物车成功','/product_list/none',u'点击继续购买','/shopping_cart',u'点击进入购物车')
-        if checkret == -5:
-            return '商品立即购买'
-
-
 # 购物车
 @app.route('/shopping_cart')
 def shopping_cart():
@@ -206,6 +201,17 @@ def shopping_cart_del(nid):
         if del_ret == -1:
             return red_writing_1(u'只能删除自己的购物车产品', '/shopping_cart',u'点击返回')
         redirect('/shopping_cart')
+
+
+# 订单
+@app.route('/api/v1/transaction_details', method="post")
+def transaction_details():
+        lis = request.forms.get('lis')
+        print(lis)
+        return lis
+
+
+
 
 
 

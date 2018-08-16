@@ -30,6 +30,10 @@ from models.categories import *
 from models.groups import *
 from models.ips import *
 from models.shopping_cart import *
+from models.payments import *
+from models.transactions import *
+from models.address import *
+
 
 # 图片检测
 def checkPic(pic):
@@ -376,7 +380,8 @@ def cartInfo(login_name):
         user_info = Users.get(Users.name == login_name)
         user_id = user_info.id
         cart_info = ShoppingCart.select().where(ShoppingCart.users == user_id).order_by(ShoppingCart.product)
-        return cartHtml(cart_info)
+        carriage_info = Settings.get(Settings.description == 'carriage')
+        return cartHtml(cart_info,carriage_info)
     except Exception as e:
         log.error(traceback.format_exc())
 
