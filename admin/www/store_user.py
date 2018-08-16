@@ -212,7 +212,11 @@ def delParameters(html_nid):
         parametersret = ProductParameters.get(ProductParameters.id == html_nid,ProductParameters.del_status==0)
         parametersret.del_status=-1
         parametersret.save()
-        return 0
+        product_id = ProductParameters.get(ProductParameters.id == html_nid).product.id
+        log.info('222222222')
+        log.info(product_id)
+        log.info(type(product_id))
+        return product_id
     except Exception as e:
         log.error(traceback.format_exc())
 

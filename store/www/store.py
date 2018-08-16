@@ -48,21 +48,16 @@ def register():
         ret = checkIp()
         if ret == -1:
             return red_writing_1(u'每个IP每天最多接收5条短信','/',u'点击返回主页')
-        print('checkip checkip checkip')
-        print('checkip random time  is', ret)
         sendsmsret = registerSendSms(cellphone,ret[0])
         lis = []
         lis.append(cellphone)
         lis.append(sendsmsret)
         lis.append(ret[1])
-        log.info('register checkip send_sms is %s'%lis)
         response.set_cookie('register_info', lis, domain='www.fish-23.com', path = '/', secret = 'asf&*4561')
         redirect('/register_add')
 
 @app.route('/register_add')
 def register_add():
-        info = request.get_cookie('register_info', secret = 'asf&*4561')
-        log.info('register_add  info is %s'%info)
         register_add_html = read_file('templates/register_add.html')
         return register_add_html
         
@@ -177,6 +172,11 @@ def product_details():
         if checkret == -3:
             return red_writing_1(u'请选择需要购买的规格','/product_details/%s'%product_id,u'点击返回')
         if checkret == 1:
+            return red_writing_2(u'加入购物车成功','/product_list/none',u'点击继续购买','/shopping_cart',u'点击进入购物车')
+        if checkret == -5:
+            return '商品立即购买'
+
+
             return red_writing_2(u'加入购物车成功','/product_list/none',u'点击继续购买','/shopping_cart',u'点击进入购物车')
         if checkret == -5:
             return '商品立即购买'

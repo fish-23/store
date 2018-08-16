@@ -175,12 +175,11 @@ def apiAdd():
 
 @app.route('/parameters_del/<html_nid>')
 def lis_del(html_nid):
-        product_nid = request.get_cookie('product_nid', secret = 'asf&*458')
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
         delret = delParameters(html_nid)
-        return redirect('/parameters_list/%s'%product_nid)
+        return redirect('/parameters_list/%s'%delret)
 
 
 # 用户管理

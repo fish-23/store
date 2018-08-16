@@ -84,7 +84,7 @@ def recordImage(picaddr,pic, nid):
         byte_data = output_buffer.getvalue()
         base64_str = base64.b64encode(byte_data)
         # 存缩略图
-        ret = Users.get(Users.id == nid)
+        ret = Users.get(Users.id == nid,Users.del_status == 0)
         ret.avaturaddr = picaddr
         ret.avatur = base64_str
         ret.save()
@@ -96,14 +96,15 @@ def recordImage(picaddr,pic, nid):
 # ip检测
 def checkIp():
     try:
-        print('checkip')
         ipaddr = request.headers.get('X-Real-IP3')
         time_now = int(time.time())
-        print('time_now is', time_now)
         dbip = Ips.select().where(Ips.ipaddr == ipaddr)
         if dbip.count() == 0:
             Ips.create(ipaddr=ipaddr, sendsms_time=time_now)
-            return ipaddr
+            lis = []
+            lis.append(ipaddr)
+            lis.append(time_now)
+            return lis
         dbip = Ips.get(Ips.ipaddr == ipaddr)
         dbnum = dbip.num
         dbsendtime = dbip.sendsms_time
@@ -114,9 +115,7 @@ def checkIp():
             return -1
         lis = []
         lis.append(ipaddr)
-        log.info('store_user.py checkip %s'%time_now)
         lis.append(time_now)
-        log.info('store_user.py checkip %s'%lis)
         return lis
     except Exception as e:
         log.error(traceback.format_exc())
@@ -307,9 +306,9 @@ def productInfo(name):
             i = k[0]
             j = k[1]               
             if name =='none':
-                productret = Products.select().where(Products.category == i)
+                productret = Products.select().where(Products.category == i,Products.del_status==0)
             else:
-                productret = Products.select().where(Products.category == i, Products.name % '%{}%'.format(name))
+                productret =Products.select().where(Products.category==i,Products.del_status==0 ,Products.name % '%{}%'.format(name))
                 count = productret.count()
                 if count == 0:
                     continue
@@ -328,8 +327,8 @@ def productSearch(name):
 
 def productDetails(nid):
     try:
-        productret = Products.get(Products.id == nid)
-        parameterret = ProductParameters.select().where(ProductParameters.product == nid)
+        productret = Products.get(Products.id == nid,Products.del_status==0)
+        parameterret = ProductParameters.select().where(ProductParameters.product == nid,ProductParameters.del_status==0)
         return productDetailsHtml(productret, parameterret)
     except Exception as e:
         log.error(traceback.format_exc())
