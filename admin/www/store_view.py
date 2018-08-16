@@ -71,10 +71,10 @@ def listHtml(ret):
             h = h + '<br>' + '产品缩略图：' + '<img src="data:image/jpg;base64,%s"/>'%html_thumbnail + '<br>'
             h = h + '<br>' + '<a href="/parameters_list/' + str(html_nid) + u'">产品规格</a>' + display_space
             h = h + '<a href="/product_del/' + str(html_nid) + u'">删除</a>' + display_space 
-            h = h + '<a href="/product_modify/' + str(html_nid) + u'">修改</a ><br>'
+            h = h + '<a href="/product_modify/' + str(html_nid) + u'">修改</a ><br>'+'<br>'
         welcome = u'<fieldset><legend><h2>产品列表</h2></legend>'
         entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-        add_link = u'<br> <a href="/product_add">点击添加</a ><body></html>'
+        add_link = u'<a href="/product_add">点击添加</a ><body></html>'
         index_link = u'<a href="/">点击返回主页</a ><body></html>'+ '<br>'
         h = welcome+ h + '<br>' + add_link + display_space + index_link + entry_time
         return h

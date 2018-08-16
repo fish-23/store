@@ -227,7 +227,7 @@ def saveParameters(product_nid, num, price, discount, description):
             return -2
         price = round(float(price),2)
         discount = round(float(discount),2)
-        para_ret = ProductParameters.select().where(ProductParameters.description==description)
+        para_ret =ProductParameters.select().where(ProductParameters.product==product_nid,ProductParameters.description==description)
         para_up = para_ret.where(ProductParameters.del_status==0)
         para_down = para_ret.where(ProductParameters.del_status==-1)
         if para_up.count() > 0:
