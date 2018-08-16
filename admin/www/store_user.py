@@ -101,7 +101,7 @@ def recordImage(picaddr,pic, nid):
         byte_data = output_buffer.getvalue()
         base64_str = base64.b64encode(byte_data)
         # 存缩略图
-        ret = Products.get(Products.id == nid)
+        ret = Products.get(Products.id == nid,Products.del_status==0)
         ret.picaddr = picaddr
         ret.thumbnail = base64_str
         ret.save()
@@ -120,15 +120,32 @@ def saveProduct(name, num, price, discount, description, user_name, category):
             return -4
         if name == '':
             return -2
-        owner_id = Users.select(Users.id).where(Users.name == user_name)
-        group = Groups.get(Groups.owner == owner_id)
-        group_id = group.id
-        product = Products.select().where(Products.name == name).count()
-        if product > 0:
-            return -3
         price = round(float(price),2)
         discount = round(float(discount),2)
-        product = Products.create(
+        owner_id = Users.select(Users.id).where(Users.name == user_name)
+        group = Groups.get(Groups.owner == owner_id,Groups.del_status==0)
+        group_id = group.id
+        product_ret = Products.select().where(Products.name == name)
+        product_up = product_ret.where(Products.del_status==0)
+        product_down = product_ret.where(Products.del_status==-1)
+        print('222222222')
+        print(product_down.count())
+        if product_up.count() > 0:
+            return -3
+        if product_down.count() > 0:
+            product_add = Products.get(Products.name == name,Products.del_status==-1)
+            product_add.name=name
+            product_add.num=num
+            product_add.price=price
+            product_add.discount=discount
+            product_add.description=description
+            product_add.category=int(category)
+            product_add.group=group_id
+            product_add.del_status=0
+            product_add.save()
+            print('444')
+        else:
+            product_add = Products.create(
                                  name=name, 
                                  num=num, 
                                  price=price, 
@@ -137,11 +154,13 @@ def saveProduct(name, num, price, discount, description, user_name, category):
                                  category=int(category), 
                                  group=group_id
                                  )
-        
+        print('3333333333333')                       
         lis = []
-        product_id = product.id
+        product_id = product_add.id
+        print('product_id is',product_id)
         lis.append(int(product_id))
         lis.append(int(group_id))
+        print('lis is',lis)
         return lis        
     except Exception as e:
         log.error(traceback.format_exc())
@@ -150,41 +169,49 @@ def findProduct(name):
     try:
         owner_info = Users.get(Users.name == name)
         owner_id = owner_info.id
-        group = Groups.get(Groups.owner == owner_id)
+        group = Groups.get(Groups.owner == owner_id,Groups.del_status==0)
         group_id = group.id
-        ret = Products.select().where(Products.group== group_id).order_by(Products.category,Products.id.desc())
+        ret = Products.select().where(Products.group== group_id,Products.del_status==0)
+        ret = ret.order_by(Products.category,Products.id.desc())
         return ret  
     except Exception as e:
         log.error(traceback.format_exc())
 
 def delProduct(html_nid):
     try:
-        ret = Products.get(Products.id == html_nid)
-        picaddr = ret.picaddr
-        ret.delete_instance()
-        os.system('rm -rf %s'%picaddr)
+        products_ret = Products.get(Products.id == html_nid,Products.del_status==0)
+        products_ret.del_status = -1
+        products_ret.save()
+        parameter_ret = ProductParameters.select().where(ProductParameters.product == html_nid)
+        parameter_ret = parameter_ret.where(ProductParameters.del_status==0)
+        if parameter_ret.count() == 0:
+            return 0 
+        for i in parameter_ret:
+            i.del_status = -1
+            i.save()
         return 0 
     except Exception as e:
         log.error(traceback.format_exc())
 
 def modifyProduct(html_nid):      
     try:          
-        ret = Products.get(Products.id == html_nid)
+        ret = Products.get(Products.id == html_nid,Products.del_status==0)
         return listModifyHtml(ret)
     except Exception as e:
         log.error(traceback.format_exc())
 
 def findParameters(html_nid):
     try:
-        parameterret = ProductParameters.select().where(ProductParameters.product == html_nid)
+        parameterret = ProductParameters.select().where(ProductParameters.product == html_nid,ProductParameters.del_status==0)
         return parameterret
     except Exception as e:
         log.error(traceback.format_exc())
 
 def delParameters(html_nid):
     try:
-        parametersret = ProductParameters.get(ProductParameters.id == html_nid)
-        parametersret.delete_instance()
+        parametersret = ProductParameters.get(ProductParameters.id == html_nid,ProductParameters.del_status==0)
+        parametersret.del_status=-1
+        parametersret.save()
         return 0
     except Exception as e:
         log.error(traceback.format_exc())
@@ -198,7 +225,24 @@ def saveParameters(product_nid, num, price, discount, description):
             return -3
         if description == '':
             return -2
-        ProductParameters.create(
+        price = round(float(price),2)
+        discount = round(float(discount),2)
+        para_ret = ProductParameters.select().where(ProductParameters.description==description)
+        para_up = para_ret.where(ProductParameters.del_status==0)
+        para_down = para_ret.where(ProductParameters.del_status==-1)
+        if para_up.count() > 0:
+            return -4
+        if para_down.count() > 0:
+            para_add = ProductParameters.get(ProductParameters.description==description,ProductParameters.del_status==-1)
+            para_add.num=num
+            para_add.price=price
+            para_add.discount=discount
+            para_add.description=description
+            para_add.product=product_nid
+            para_add.del_status=0
+            para_add.save()
+        else:    
+            ProductParameters.create(
                              num=num,
                              price=price,
                              discount=discount,
@@ -213,20 +257,22 @@ def saveParameters(product_nid, num, price, discount, description):
 # 用户管理
 def findUser(name):
     try:
-        userret = Users.select()
+        userret = Users.select().where(Users.del_status==0)
         return userret
     except Exception as e:
         log.error(traceback.format_exc())
 
 def delUser(html_nid):
     try:
-        userret = Users.get(Users.id == html_nid)
-        name = userret.name
-        avaturaddr = userret.avaturaddr
+        user_ret = Users.get(Users.id == html_nid,Users.del_status==0)
+        name = user_ret.name
         if name == 'admin':
             return -1
-        userret.delete_instance() 
-        os.system('rm -rf %s'%avaturaddr)        
+        user_ret.del_status = -1
+        user_ret.description = 'admin后台删除'
+        import datetime
+        user_ret.del_time = datetime.datetime.now() 
+        user_ret.save() 
         return 0
     except Exception as e:
         log.error(traceback.format_exc())

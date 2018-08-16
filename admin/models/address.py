@@ -6,7 +6,7 @@ from models.base import BaseModel
 from models.users import Users
 from datetime import datetime
 
-class Adress(BaseModel):
+class Address(BaseModel):
     # 姓名
     name = CharField()
     # 电话

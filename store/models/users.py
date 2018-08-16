@@ -28,8 +28,12 @@ class Users(BaseModel):
     gender = CharField(null=True)
     # 出生日期
     birthday = CharField(null=True)
+    # 备注
+    description = TextField(null=True)
     # 删除状态(0未删除，-1已删除)
     del_status = IntegerField(default=0)
+    # 删除时间
+    del_time = DateTimeField(null=True)
     # 最后登录时间
     login_time = DateTimeField(null=True)   
     # 邮件发送时间

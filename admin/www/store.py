@@ -161,6 +161,7 @@ def apiAdd():
         price = request.forms.get('price')
         discount = request.forms.get('discount')
         description = request.forms.get('name')
+        description = description.strip()
         pararet = saveParameters(product_nid, num, price, discount, description)
         if pararet == -1:
             return red_writing_1(u'价格,折扣价格,数量必须是正数','/parameters_add/%s'%product_nid, u'返回')
@@ -168,6 +169,8 @@ def apiAdd():
             return red_writing_1(u'规格描述不能为空','/product_add/%s'%product_nid, u'返回')
         if pararet == -3:
             return red_writing_1(u'价格,折扣价格,数量必须大于0.01，小于9999','/product_add/%s'%product_nid, u'返回')
+        if pararet == -4:
+            return red_writing_1(u'规格已存在','/product_add/%s'%product_nid, u'返回')        
         return red_writing_1(u'规格录入成功','/parameters_list/%s'%product_nid,u'点击进入规格列表')
 
 @app.route('/parameters_del/<html_nid>')

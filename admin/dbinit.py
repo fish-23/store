@@ -10,6 +10,10 @@ from models.product_parameters import *
 from models.settings import *
 from models.ips import *
 from models.shopping_cart import *
+from models.address import *
+from models.transactions import *
+from models.payments import *
+
 
 import sys
 sys.path.append('/root')
@@ -26,7 +30,10 @@ def createTables():
          ProductParameters,
          Settings,
          Ips,
-         ShoppingCart
+         ShoppingCart,
+         Address,
+         Transactions,
+         Payments
          ] 
     db.create_tables(tables)
 
@@ -41,14 +48,14 @@ def insertData():
                    name = '公司',
                    description = '公司',
                    parent_name = '系统',
-                   parent_id = 1
+                   parent = 1
                    )
     
     categories_third = Categories.get_or_create(
                    name = '产品',
                    description = '产品',
                    parent_name = '系统',
-                   parent_id = 1
+                   parent = 1
                    )
     
     # users
