@@ -57,6 +57,8 @@ def list():
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
         if checkLogin(name, ADMINPASSW) == -1:
             return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        log.info('22222')
+        log.info('name is %s'%name)
         findret = findProduct(name)
         h = listHtml(findret)
         return h          

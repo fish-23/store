@@ -95,7 +95,7 @@ def productListJoinHtml(h):
         search_link = '<form action="/api/v1/product_list" method="post">'
         search_link = search_link + '<font color="red"><h3>' + '产品名：' + '<input type="text" name="name"/>' 
         search_link = search_link + '<input type="submit" value="搜索"/>' + '</h3></font>' +'</form>' 
-        h = welcome + search_link + h + '<br>' + index_link + entry_time
+        h = welcome + search_link + h + index_link + entry_time
         return h
     except Exception as e:
         log.error(traceback.format_exc())
@@ -204,4 +204,37 @@ def cartHtml(cart_info,carriage_info):
         h = welcome+ h + price_all + carriage + total_price  + payment + product_link + display_space + index_link + entry_time
         return h        
     except Exception as e:
-        log.error(traceback.format_exc()) 
+        log.error(traceback.format_exc())
+
+
+
+# address
+def addressListHrml(address_ret):
+    try:
+        h = u'<html><body>'
+        h = h + '<form action="/api/v1/address_list" method="post" enctype="multipart/form-data">'
+        for i in address_ret:
+            html_nid = i.id
+            html_name = i.name
+            html_phone = i.phone
+            html_city  = i.city 
+            html_address  = i.address
+            html_postcode  = i.postcode
+            html_defaults= i.defaults
+            address = html_city + ' ' +  html_address
+            if int(html_defaults) == 0:
+                h = h + '<font>' + '设置为默认地址：' + '<input type="Radio" name="defaults" value="%s">'%html_nid + display_space
+            h = h + '<font>' + '姓名：' + html_name + '</font>' + display_space
+            h = h + '<font>' + '电话：' + html_phone + '</font>' + '<br>'
+            h = h + '<font>' + '收货地址：' + address + '</font>' + display_space
+            h = h + '<font>' + '邮政编码：' + html_postcode + '</font>' + display_space
+            h = h + '<a href="/address_del/' + str(html_nid) + u'">删除</a>' +  '<br>' + '<br>'
+        welcome = u'<fieldset><legend><h2>收货地址管理</h2></legend>'
+        entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        add_link = u'<a href="/address_add">点击添加</a ><body></html>'
+        set_up = '<input type="submit" value="设置"/>'
+        index_link = u'<a href="/">点击返回主页</a ><body></html>'+ '<br>'
+        h = welcome+ h + set_up  + '<br>' + add_link + display_space + index_link + entry_time
+        return h
+    except Exception as e:
+        log.error(traceback.format_exc())

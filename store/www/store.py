@@ -206,9 +206,93 @@ def shopping_cart_del(nid):
 # 订单
 @app.route('/api/v1/transaction_details', method="post")
 def transaction_details():
+        login_name = request.get_cookie('login_name', secret = 'asf&*181183')
+        checkret = checkLogin(login_name)
+        if checkret == -1:
+            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
+        if checkret == -2:
+            return red_writing_1(u'用户不存在', '/register',u'点击注册')
         lis = request.forms.get('lis')
-        print(lis)
-        return lis
+        trans_ret = transDetails(lis, login_name)
+        if trans_ret == -1:
+            return red_writing_1(u'请添加收货地址', '/address_add',u'点击添加')
+        if trans_ret == -2:
+            return red_writing_1(u'请设置默认收货地址', '/address_add',u'点击设置')
+
+
+@app.route('/address_add')
+def address_add():
+        login_name = request.get_cookie('login_name', secret = 'asf&*181183')
+        checkret = checkLogin(login_name)
+        if checkret == -1:
+            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
+        if checkret == -2:
+            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        address_html = read_file("templates/address_add.html")
+        return address_html
+
+@app.route('/api/v1/address_add', method="post")
+def address_add():
+        login_name = request.get_cookie('login_name', secret = 'asf&*181183')
+        checkret = checkLogin(login_name)
+        if checkret == -1:
+            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
+        if checkret == -2:
+            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        name = request.forms.get('name')
+        phone = request.forms.get('phone')
+        city = request.forms.get('city')
+        address = request.forms.get('address')
+        postcode = request.forms.get('postcode')
+        defaults = request.forms.get('defaults')
+        add_ret = addressAdd(name,phone,city,address,postcode,defaults,login_name)
+        if add_ret == -1:
+            return red_writing_1(u'填写的数据不能为空', '/address_add',u'返回')
+        if add_ret == -2:
+            return red_writing_1(u'选择是否设置为默认地址', '/address_add',u'返回')
+        if add_ret == -3:
+            return red_writing_1(u'手机号格式不正确','/address_add',u'返回')             
+        if add_ret == -4:
+            return red_writing_1(u'邮编为6位纯数字','/address_add',u'返回')
+        return red_writing_2(u'收货地址添加成功','/address_list',u'点击查看收货地址', '/',u'点击返回首页')
+
+@app.route('/address_list')
+def address_list():
+        login_name = request.get_cookie('login_name', secret = 'asf&*181183')
+        checkret = checkLogin(login_name)
+        if checkret == -1:
+            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
+        if checkret == -2:
+            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        h = addressList(login_name)  
+        return h   
+
+@app.route('/api/v1/address_list', method="post")
+def address_list():
+        login_name = request.get_cookie('login_name', secret = 'asf&*181183')
+        checkret = checkLogin(login_name)
+        if checkret == -1:
+            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
+        if checkret == -2:
+            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        nid = request.forms.get('defaults')
+        ret = addressDefaults(nid,login_name)
+        redirect('/address_list')
+
+@app.route('/address_del/<nid>')
+def address_del(nid):
+        login_name = request.get_cookie('login_name', secret = 'asf&*181183')
+        checkret = checkLogin(login_name)
+        if checkret == -1:
+            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
+        if checkret == -2:
+            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        del_ret = addressDel(login_name,nid)
+        if del_ret == -1:
+            return red_writing_1(u'只能删除自己的购物车产品', '/shopping_cart',u'点击返回')
+        redirect('/address_list')
+
+
 
 
 
@@ -218,6 +302,7 @@ def transaction_details():
 # 个人中心
 @app.route('/user_list')
 def user_list():
+        redirect('/address_list')
         return red_writing_1(u'功能开发中','/',u'点击返回')
 
 

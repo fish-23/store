@@ -1,0 +1,29 @@
+<html>
+<body>
+<form action="/api/v1/address_add" method="post" enctype="multipart/form-data">
+<fieldset>
+   <legend> <h1> 收货地址录入 </h1></legend>
+   <p>
+   姓名:<input type="text" name="name"/>
+   </p>
+   <p>
+   电话:<input type="text" name="phone"/>
+   </p>
+   <p>
+   省市区:<input type="text" name="city"/>
+   </p>
+   <p>
+   地址:<input type="text" name="address"/>
+   </p>
+   <p>
+   邮编:<input type="text" name="postcode"/>
+   </p>
+   设置为默认地址：
+   是：<input type="Radio" name="defaults" value="1">&nbsp &nbsp &nbsp &nbsp
+   否：<input type="Radio" name="defaults" value="0">
+   <p>
+   <input type="submit" value="增加"/>
+   </p>
+</form>
+</body>
+</html>

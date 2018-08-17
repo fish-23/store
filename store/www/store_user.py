@@ -397,3 +397,92 @@ def cartDel(login_name,nid):
         return 0 
     except Exception as e:
         log.error(traceback.format_exc())
+
+
+# 订单
+def transDetails(lis,login_name):
+    try:
+        address_ret = Address.select().where(Address.users.name == login_name)
+        if address_ret.count() == 0:
+            return -1
+        address_ret = address_ret.where(Address.defaults == 1)
+        if address_ret.count() == 0:
+            return -2  
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+
+# 收货地址
+def addressAdd(name,phone,city,address,postcode,defaults,login_name):
+    try:
+        user_info = Users.get(Users.name == login_name)
+        user_id = user_info.id
+        name = name.strip()
+        phone = phone.strip()
+        city = city.strip()
+        address = address.strip()
+        postcode = postcode.strip()
+        if name=='' or city=='' or address=='':
+            return -1
+        if defaults == '':
+            return -2
+        if checkCellphone(phone) == -2:
+            return -3
+        if len(postcode) != 6 or postcode.isdigit() != True:
+            return -4
+        defaults = int(defaults)
+        print('2222222')
+        print(defaults)
+        if defaults == 1:
+            address_ret = Address.select().where(Address.users == user_id,Address.defaults == 1)
+            print('3333333333')
+            print(address_ret.count())
+            if address_ret.count() != 0:
+                print('444444')
+                address_ret = Address.get(Address.users == user_id,Address.defaults == 1)
+                address_ret.defaults = 0
+                address_ret.save()
+                print('5555555')
+        print('6666')
+        Address.create(name=name, phone=phone, city=city, address=address, postcode=postcode, defaults=defaults,users=user_id)
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+def addressList(login_name):
+    try:
+        user_info = Users.get(Users.name == login_name)
+        user_id = user_info.id
+        address_ret = Address.select().where(Address.users == user_id)
+        return addressListHrml(address_ret)
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+def addressDefaults(nid,login_name):
+    try:
+        user_info = Users.get(Users.name == login_name)
+        user_id = user_info.id
+        count = Address.select().where(Address.users == user_id,Address.defaults == 1).count()
+        if count != 0:
+              address_ret = Address.get(Address.users == user_id,Address.defaults == 1)
+              address_ret.defaults = 0       
+              address_ret.save()
+        address = Address.get(Address.id == nid)
+        address.defaults = 1
+        address.save()
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+def addressDel(login_name,nid):
+    try:
+        user_info = Users.get(Users.name == login_name)
+        user_id = user_info.id
+        address_info = Address.get(Address.id == nid)
+        address_user = address_info.users.id
+        if int(user_id) != int(address_user):
+            return -1
+        address_info.delete_instance()
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
+

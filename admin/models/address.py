@@ -14,9 +14,11 @@ class Address(BaseModel):
     # 省市区
     city = TextField()
     # 地址
-    adress = TextField()
+    address = TextField()
     # 邮编
     postcode = CharField(null=True)
+    # 默认地址
+    defaults = IntegerField(default = 0)
     # 所属用户
     users = ForeignKeyField(Users, related_name='adress_users', on_delete='CASCADE')
     # 创建时间
