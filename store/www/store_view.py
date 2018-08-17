@@ -4,6 +4,7 @@
 import sys
 import traceback
 import time,datetime
+import json
 sys.path.append('../')
 sys.path.append('/root')
 from log import *
@@ -147,7 +148,7 @@ def productDetailsHtml(productret,parameterret):
 def cartHtml(cart_info,carriage_info):        
     try:
         h = u'<html><body>'
-        h = h + '<form action="/api/v1/transaction_details" method="post" enctype="multipart/form-data">' + '<h4>'
+        h = h + '<form action="/api/v1/transaction_confirm" method="post" enctype="multipart/form-data">' + '<h4>'
         display_space = '&nbsp'*6
         lis = []
         price = 0
@@ -169,11 +170,11 @@ def cartHtml(cart_info,carriage_info):
             dic['product_id'] = product_id
             dic['parameter_id'] = parameter_id
             dic['name'] = html_name
-            dic['thumbnail'] = html_thumbnail
             dic['discount'] = html_discount
-            dic['description'] = html_description
             dic['num'] = html_num
             dic['parameter_price'] = parameter_price
+            dic['description'] = html_description
+            dic['thumbnail'] = html_thumbnail
             lis.append(dic)
             h = h + '<img src="data:image/jpg;base64,%s"/>'%html_thumbnail + display_space
             h = h + '<font>' + '名称：' + html_name + '</font>' + display_space
@@ -186,13 +187,13 @@ def cartHtml(cart_info,carriage_info):
         else:
             carriage = carriage
         total_price = price + carriage
-        dic = {}
-        dic['carriage'] = carriage
-        dic['price'] = price
-        dic['total_price'] = total_price
-        dic['shoping_cart'] = 0
-        lis.append(dic)
-        h = h + '<input type="hidden" name="lis" value="%s">'%lis + '</h4>'
+        proditems = {}
+        proditems['price'] = price
+        proditems['total_price'] = total_price
+        proditems['money_full'] = money_full 
+        proditems['carriage'] = carriage
+        proditems['lis'] = lis
+        h = h + '<input type="hidden" name="proditems" value="%s">'%proditems + '</h4>'
         welcome = u'<fieldset><legend><h2>购物车</h2></legend>'
         entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())) + '</h4>'
         product_link = '<h4>' + u'<a href="/product_list/none">产品列表</a ><body></html>'
@@ -235,6 +236,76 @@ def addressListHrml(address_ret):
         set_up = '<input type="submit" value="设置"/>'
         index_link = u'<a href="/">点击返回主页</a ><body></html>'+ '<br>'
         h = welcome+ h + set_up  + '<br>' + add_link + display_space + index_link + entry_time
+        return h
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+# 订单管理
+def transConfirmHtml(address_ret,proditems):
+    try:
+        h = u'<html><body>'
+        h = h + '<form action="/api/v1/transaction_create" method="post" enctype="multipart/form-data">'
+        h = h + '<font color="red">' + '<h3>' + '收货地址选择'+ '</h3>'  + '</font>'
+        h = h + '<h4>'
+        for i in address_ret:
+            html_nid = i.id
+            html_name = i.name
+            html_phone = i.phone
+            html_city  = i.city 
+            html_address  = i.address
+            html_postcode  = i.postcode
+            html_defaults= i.defaults
+            address = html_city + ' ' +  html_address
+            h = h + '<font>' + '收货地址选择：' + '<input type="Radio" name="choice" value="%s">'%html_nid + display_space
+            h = h + '<font>' + '姓名：' + html_name + '</font>' + display_space
+            h = h + '<font>' + '电话：' + html_phone + '</font>' + display_space
+            h = h + '<font>' + '收货地址：' + address + '</font>' + display_space
+            h = h + '<font>' + '邮政编码：' + html_postcode + '</font>' + '<br>'
+        h = h  + '</h4>'
+        money_full = proditems['money_full']
+        carriage = proditems['carriage']
+        db_price = proditems['price']
+        db_total_price = proditems['total_price']
+        h = h   +'<font color="red">' + '<h3>' + '商品'+ '</h3>'  + '</font>'
+        product_lis = proditems['lis']
+        price = 0
+        j = len(product_lis)
+        h = h + '<h4>'
+        for i in product_lis:
+            cart_nid = i['cart_nid']
+            product_id = i['product_id']
+            parameter_id = i['parameter_id']
+            name = i['name']
+            num = i['num']
+            discount = i['discount']
+            parameter_price = i['parameter_price']
+            description = i['description']
+            thumbnail = i['thumbnail']
+            parameter_price = float(discount)*int(num)
+            price = price + parameter_price            
+            h = h + '<img src="data:image/jpg;base64,%s"/>'%thumbnail + display_space
+            h = h + '<font>' + '名称：' + name + '</font>' + display_space
+            h = h + '<font>' + '价格：' + str(discount) + '</font>' + display_space
+            h = h + '<font>' + '规格描述：' + description + '</font>' + display_space
+            h = h + '<font>' + '购买数量：' + str(num) + '</font>' + '<br>'
+        h = h + '</h4>'     
+        if price > money_full:
+            carriage = 0
+        else:
+            carriage = int(carriage)
+        total_price = price + carriage
+        if int(total_price*100) !=  int(total_price*100):
+            print('err err')
+            return -2
+        h = h + '<font color="red"><h3>' + '配送方式：'+ '快递：'+'<input type="Radio" name="choice" value="1">' + '</h3></font>'
+        h = h + '<font color="red"><h3>' + '卖家留言：' + '<input type="text" name="remark"/>' + '</h3></font>'
+        h = h + '<font color="red"><h3>' + '共%s件商品'%j + display_space  + '小计：￥%s'%db_total_price + '</h3></font>' 
+        welcome = u'<fieldset><legend><h2>确认订单</h2></legend>'
+        entry_time = u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        carriage =  '<font color="red">'  + '运费：￥' + str(carriage) + '</font>' + display_space
+        total_price = '<font color="red">'  + '合计：' + str(total_price) + '</font>' + display_space
+        payment = '<input type="submit" name="buy" value="提交订单"/>'  +'<br>' +'<br>'
+        h = welcome+ h +'<h3>' +carriage + total_price  + payment + entry_time + '</h3>'
         return h
     except Exception as e:
         log.error(traceback.format_exc())

@@ -400,14 +400,14 @@ def cartDel(login_name,nid):
 
 
 # 订单
-def transDetails(lis,login_name):
+def transConfirm(proditems,login_name):
     try:
-        address_ret = Address.select().where(Address.users.name == login_name)
+        user_info = Users.get(Users.name == login_name)
+        user_id = user_info.id        
+        address_ret = Address.select().where(Address.users == user_id)
         if address_ret.count() == 0:
             return -1
-        address_ret = address_ret.where(Address.defaults == 1)
-        if address_ret.count() == 0:
-            return -2  
+        return transConfirmHtml(address_ret,proditems)        
     except Exception as e:
         log.error(traceback.format_exc())
 
@@ -431,19 +431,12 @@ def addressAdd(name,phone,city,address,postcode,defaults,login_name):
         if len(postcode) != 6 or postcode.isdigit() != True:
             return -4
         defaults = int(defaults)
-        print('2222222')
-        print(defaults)
         if defaults == 1:
             address_ret = Address.select().where(Address.users == user_id,Address.defaults == 1)
-            print('3333333333')
-            print(address_ret.count())
             if address_ret.count() != 0:
-                print('444444')
                 address_ret = Address.get(Address.users == user_id,Address.defaults == 1)
                 address_ret.defaults = 0
                 address_ret.save()
-                print('5555555')
-        print('6666')
         Address.create(name=name, phone=phone, city=city, address=address, postcode=postcode, defaults=defaults,users=user_id)
         return 0
     except Exception as e:

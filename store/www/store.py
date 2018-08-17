@@ -7,6 +7,7 @@ import base64
 import io
 import struct
 import sys
+import json
 sys.path.append('../')
 sys.path.append('/root')
 from log import *
@@ -204,20 +205,23 @@ def shopping_cart_del(nid):
 
 
 # 订单
-@app.route('/api/v1/transaction_details', method="post")
-def transaction_details():
+@app.route('/api/v1/transaction_confirm', method="post")
+def transaction_confirm():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
         checkret = checkLogin(login_name)
         if checkret == -1:
             return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
         if checkret == -2:
             return red_writing_1(u'用户不存在', '/register',u'点击注册')
-        lis = request.forms.get('lis')
-        trans_ret = transDetails(lis, login_name)
+        proditems = request.forms.get('proditems')
+        proditems = proditems.replace("'","\"")
+        proditems = json.loads(proditems)
+        trans_ret = transConfirm(proditems, login_name)
         if trans_ret == -1:
             return red_writing_1(u'请添加收货地址', '/address_add',u'点击添加')
         if trans_ret == -2:
-            return red_writing_1(u'请设置默认收货地址', '/address_add',u'点击设置')
+            return red_writing_1(u'购买异常，请联系网站工作人员', '/',u'返回主页')        
+        return trans_ret         
 
 
 @app.route('/address_add')
@@ -254,7 +258,8 @@ def address_add():
             return red_writing_1(u'手机号格式不正确','/address_add',u'返回')             
         if add_ret == -4:
             return red_writing_1(u'邮编为6位纯数字','/address_add',u'返回')
-        return red_writing_2(u'收货地址添加成功','/address_list',u'点击查看收货地址', '/',u'点击返回首页')
+            return red_writing_1(u'邮编为6位纯数字','/address_add',u'返回')
+        return red_writing_2(u'收货地址添加成功','/address_list',u'收货地址管理', '/shopping_cart',u'返回购物车')
 
 @app.route('/address_list')
 def address_list():
@@ -293,19 +298,11 @@ def address_del(nid):
         redirect('/address_list')
 
 
-
-
-
-
-
-
 # 个人中心
 @app.route('/user_list')
 def user_list():
         redirect('/address_list')
         return red_writing_1(u'功能开发中','/',u'点击返回')
-
-
 
 
 @app.error(404)
