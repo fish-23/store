@@ -294,7 +294,8 @@ def transConfirmHtml(address_ret,proditems):
             log.info('transConfirmHtml  err')
             return -2
         h = h + '<input type="hidden" name="proditems" value="%s">'%proditems
-        h = h + '<font color="red"><h3>' + '配送方式(默认快递)：'+ '快递：'+'<input type="Radio" name="send_way" value="1">' + '</h3></font>'
+        h = h + '<font color="red"><h3>' + '配送方式(默认快递)：'
+        h = h + '快递：'+'<input type="Radio" name="send_way" value="快递">' + '</h3></font>'
         h = h + '<font color="red"><h3>' + '卖家留言：' + '<input type="text" name="remark"/>' + '</h3></font>'
         h = h + '<font color="red"><h3>' + '共%s件商品'%j + display_space  + '小计：￥%s'%db_total_price + '</h3></font>' 
         welcome = u'<fieldset><legend><h2>确认订单</h2></legend>'
@@ -303,6 +304,52 @@ def transConfirmHtml(address_ret,proditems):
         total_price = '<font color="red">'  + '合计：￥' + str(total_price) + '</font>' + display_space
         payment = '<input type="submit" name="buy" value="提交订单"/>'  +'<br>' +'<br>'
         h = welcome+ h +'<h3>' +carriage + total_price  + payment + entry_time + '</h3>'
+        return h
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+def tranPayHtml(trans_ret,payments_ret):
+    try:
+        h = u'<html><body>'
+        h = h + '<form action="/api/v1/pay_ready" method="post" enctype="multipart/form-data">'
+        h = h + '<font color="red">' + '<h3>' + '收货地址'+ '</h3>'  + '</font>'
+        address = trans_ret.address
+        address = address.split(',')
+        address =  '，'.join(address)
+        h = h + '<h4>' + address + '</h4>'
+        h = h   +'<font color="red">' + '<h3>' + '商品'+ '</h3>'  + '</font>'
+        h = h + '<h4>'
+        for i in payments_ret:
+            name = i.products.name
+            thumbnail = i.products.thumbnail
+            discount = i.parameters.discount
+            description = i.parameters.description
+            num = i.num
+            h = h + '<img src="data:image/jpg;base64,%s"/>'%thumbnail + display_space
+            h = h + '<font>' + '名称：' + name + '</font>' + display_space
+            h = h + '<font>' + '价格：￥' + str(discount) + '</font>' + display_space
+            h = h + '<font>' + '规格描述：' + description + '</font>' + display_space
+            h = h + '<font>' + '购买数量：' + str(num) + '</font>' + '<br>'
+        h = h + '<h4>'
+        trade_id = trans_ret.trade_id
+        h = h   +'<font color="red">' + '<h3>' + '订单编号：'+ trade_id + '</h3>'  + '</font>'
+        created_time = str(trans_ret.created_time)
+        h = h   +'<font color="red">' + '<h3>' + '下单时间：'+ created_time + '</h3>'  + '</font>'
+        send_way = trans_ret.send_way
+        h = h   +'<font color="red">' + '<h3>' + '配送方式：'+ send_way + '</h3>'  + '</font>'
+        h = h + '<font color="red"><h3>' + '支付方式(默认微信)：'
+        h = h + '微信：'+'<input type="Radio" name="pay_way" value="1">' + '</h3></font>'
+        total_price = trans_ret.total_price
+        carriage = trans_ret.carriage
+        price = total_price - carriage
+        welcome = u'<fieldset><legend><h2>订单详情</h2></legend>'
+        entry_time = u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        price =  '<font color="red">' +'<h3>' + '商品价格：￥' + str(price) + '</font>' + display_space
+        carriage = '<font color="red">'  + '运费：￥' + str(carriage) + '</font>' + display_space
+        total_price = '<font color="red">'  + '总价：￥' + str(total_price) + '</font>' + '<br>'
+        pay = '<input type="submit" name="pay" value="去支付"/>' + '<br>' + '<br>'
+        cancel_trans = '<input type="submit" name="cancel_trans" value="取消订单"/>'+ display_space
+        h = welcome+ h + price + carriage + total_price  + '<br>'  + cancel_trans + pay + entry_time
         return h
     except Exception as e:
         log.error(traceback.format_exc())

@@ -17,7 +17,5 @@ class Payments(BaseModel):
     parameters = ForeignKeyField(ProductParameters, related_name='payments_parameters')
     # 订单
     transactions = ForeignKeyField(Transactions, related_name='payments_trans')
-    # 备注
-    remark = TextField(null=True)
     # 购买时间
     created_time = DateTimeField(default=datetime.now)

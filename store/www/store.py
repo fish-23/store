@@ -219,6 +219,8 @@ def transaction_confirm():
         trans_ret = transConfirm(proditems, login_name)
         if trans_ret == -1:
             return red_writing_1(u'请添加收货地址', '/address_add',u'点击添加')
+        if trans_ret == -3:
+            return red_writing_1(u'请设置默认收货地址', '/address_list',u'点击设置')
         if trans_ret == -2:
             return red_writing_1(u'购买异常，请联系网站工作人员', '/',u'返回主页')        
         return trans_ret         
@@ -233,13 +235,12 @@ def transaction_create():
             return red_writing_1(u'用户不存在', '/register',u'点击注册')
         address_id = request.forms.get('choice')
         send_way = request.forms.get('send_way')
+        print('send_way',send_way)
         remark = request.forms.get('remark')
         proditems = request.forms.get('proditems')
         proditems = proditems.replace("'","\"")
         proditems = json.loads(proditems)
         trans_ret = transCreate(proditems,address_id,send_way,remark,login_name)
-        if trans_ret == -1:
-            return red_writing_1(u'请选择收货地址', '/shopping_cart',u'点击返回购物车')
         redirect('/transaction_pay/%s'%trans_ret)
 
 @app.route('/transaction_pay/<nid>')
@@ -253,6 +254,7 @@ def transaction_pay(nid):
         trans_ret = tranPay(nid,login_name)
         if trans_ret == -1:
             return red_writing_1(u'只能支付自己的订单', '/',u'返回主页')
+        return trans_ret
 
 
 

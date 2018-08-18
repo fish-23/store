@@ -14,8 +14,8 @@ class Transactions(BaseModel):
     carriage = FloatField()
     # 支付方式(1微信 2支付宝 3余额)
     pay_way = IntegerField(null=True)
-    # 配送方式(1快递 2货到付款)
-    send_way = IntegerField()
+    # 配送方式(快递 货到付款)
+    send_way = CharField()
     # 购买类型(1普通产品，2积分产品)
     buy_types = IntegerField(default = 1)
     # 订单id
@@ -28,6 +28,8 @@ class Transactions(BaseModel):
     description = TextField(null=True)
     # 收货信息(收货人 + 手机号 + 地址 + 邮编)
     address = TextField()
+    # 备注
+    remark = TextField(null=True)
     # 订单所属商铺
     groups = ForeignKeyField(Groups, related_name='trans_groups')    
     # 订单所属用户

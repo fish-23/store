@@ -407,16 +407,20 @@ def transConfirm(proditems,login_name):
         address_ret = Address.select().where(Address.users == user_id)
         if address_ret.count() == 0:
             return -1
+        address_ret = address_ret.where(Address.defaults == 1)
+        if address_ret.count() == 0:
+            return -3
         return transConfirmHtml(address_ret,proditems)        
     except Exception as e:
         log.error(traceback.format_exc())
-
-def saveTrade(proditems,address,send_way,user_id):
+             
+def saveTrade(proditems,address,send_way,user_id,remark):
     try:
         import uuid
         trade_id = uuid.uuid4().hex
         total_price = proditems['total_price']
         carriage = proditems['carriage']
+        print(send_way)
         tran = Transactions.create(total_price = total_price,
                             carriage = carriage,
                             send_way = send_way,
@@ -425,13 +429,14 @@ def saveTrade(proditems,address,send_way,user_id):
                             trade_id = trade_id,      
                             trade_status=1,
                             groups = 1,                                  
-                            users = user_id
+                            users = user_id,
+                            remark = remark
                              )
         return tran
     except Exception as e:
         log.error(traceback.format_exc())
 
-def savePayments(proditems,remark,trans_id):
+def savePayments(proditems,trans_id):
     try:
         product_lis = proditems['lis']
         for i in product_lis:
@@ -441,8 +446,7 @@ def savePayments(proditems,remark,trans_id):
             pay = Payments.create(num = num,
                                products = product_id,
                                parameters = parameter_id,                              
-                               transactions = trans_id,
-                               remark = remark
+                               transactions = trans_id
                                 )
         return pay
     except Exception as e:
@@ -450,18 +454,21 @@ def savePayments(proditems,remark,trans_id):
 
 def transCreate(proditems,address_id,send_way,remark,login_name):
     try:
+        user_info = Users.get(Users.name == login_name)
+        user_id = user_info.id
         if address_id == None:
-            return -1
+            address_id = Address.get(Address.users == user_id,Address.defaults == 1).id
         if send_way == None:
-            send_way = 1
+            send_way = '快递'
+        print(send_way)
         remark = remark.strip()
         user_info = Users.get(Users.name == login_name)
         user_id = user_info.id
         address = Address.get(Address.id == address_id)
         address = "收货人:%s,手机号:%s,收货地址:%s" % (address.name,address.phone,address.city+address.address)
-        trans_info = saveTrade(proditems,address,send_way,user_id)
+        trans_info = saveTrade(proditems,address,send_way,user_id,remark)
         trans_id = trans_info.id
-        pay_info = savePayments(proditems,remark,trans_id)
+        pay_info = savePayments(proditems,trans_id)
         return trans_id
     except Exception as e:
         log.error(traceback.format_exc())    
@@ -475,8 +482,8 @@ def tranPay(nid,login_name):
         if user_id != tran_user_id:
             return -1
         payments_ret = Payments.select().where(Payments.transactions == nid)
-        print(trans_ret.address)
-        tranPayHtml(trans_ret,payments_ret)
+        h = tranPayHtml(trans_ret,payments_ret)
+        return h
     except Exception as e:
         log.error(traceback.format_exc())
 
