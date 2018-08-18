@@ -81,7 +81,7 @@ def productListHtml(ret,categories_name):
             html_category = i.category.name
             h = h + '<h4>' +'<img src="data:image/jpg;base64,%s"/>'%html_thumbnail + display_space
             h = h + '<font>' + '名称：' + html_name + '</font>' + display_space
-            h = h + '<font>' + '价格：' + str(html_discount) + '</font>' + display_space
+            h = h + '<font>' + '价格：￥' + str(html_discount) + '</font>' + display_space
             h = h + '<a href="/product_details/' + str(html_nid) + u'">产品详情</a>' + '</h4>'
         h = h + '<br>'
         return h                
@@ -128,7 +128,7 @@ def productDetailsHtml(productret,parameterret):
             description  = i.description
             h = h + '<h4>'
             h = h + '<font>' + '规格选择：' + '<input type="Radio" name="parameter" value="%s">'%nid + display_space
-            h = h + '<font>' + '价格：' + str(discount) + '</font>' + display_space
+            h = h + '<font>' + '价格：￥' + str(discount) + '</font>' + display_space
             h = h + '<font>' + '库存：' + str(num) + '</font>' + display_space 
             h = h + '<font>' + '描述：' + description + '</font>' + display_space 
         welcome = u'<fieldset><legend><h2>产品详情</h2></legend>'
@@ -178,7 +178,7 @@ def cartHtml(cart_info,carriage_info):
             lis.append(dic)
             h = h + '<img src="data:image/jpg;base64,%s"/>'%html_thumbnail + display_space
             h = h + '<font>' + '名称：' + html_name + '</font>' + display_space
-            h = h + '<font>' + '价格：' + str(html_discount) + '</font>' + display_space
+            h = h + '<font>' + '价格：￥' + str(html_discount) + '</font>' + display_space
             h = h + '<font>' + '规格描述：' + html_description + '</font>' + display_space
             h = h + '<font>' + '购买数量：' + str(html_num) + '</font>' + display_space
             h = h + '<a href="/shopping_cart_del/' + str(html_nid) + u'">删除</a>' + '<br>'
@@ -197,9 +197,9 @@ def cartHtml(cart_info,carriage_info):
         welcome = u'<fieldset><legend><h2>购物车</h2></legend>'
         entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())) + '</h4>'
         product_link = '<h4>' + u'<a href="/product_list/none">产品列表</a ><body></html>'
-        price_all = '<br>' + '<br>' +'<font color="red">' +'<h3>' + '商品价格：' + str(price) + '</font>' + display_space
-        carriage = '<font color="red">'  + '运费：' + str(carriage) + '</font>' + display_space
-        total_price = '<font color="red">'  + '总价：' + str(total_price) + '</font>' + display_space
+        price_all = '<br>' + '<br>' +'<font color="red">' +'<h3>' + '商品价格：￥' + str(price) + '</font>' + display_space
+        carriage = '<font color="red">'  + '运费：￥' + str(carriage) + '</font>' + display_space
+        total_price = '<font color="red">'  + '总价：￥' + str(total_price) + '</font>' + display_space
         payment = '<input type="submit" name="buy" value="去结算"/>'+ '</h3>' + '<br>'
         index_link = u'<a href="/">返回主页</a ><body></html>'+ '<br>'
         h = welcome+ h + price_all + carriage + total_price  + payment + product_link + display_space + index_link + entry_time
@@ -220,7 +220,6 @@ def addressListHrml(address_ret):
             html_phone = i.phone
             html_city  = i.city 
             html_address  = i.address
-            html_postcode  = i.postcode
             html_defaults= i.defaults
             address = html_city + ' ' +  html_address
             if int(html_defaults) == 0:
@@ -228,7 +227,6 @@ def addressListHrml(address_ret):
             h = h + '<font>' + '姓名：' + html_name + '</font>' + display_space
             h = h + '<font>' + '电话：' + html_phone + '</font>' + '<br>'
             h = h + '<font>' + '收货地址：' + address + '</font>' + display_space
-            h = h + '<font>' + '邮政编码：' + html_postcode + '</font>' + display_space
             h = h + '<a href="/address_del/' + str(html_nid) + u'">删除</a>' +  '<br>' + '<br>'
         welcome = u'<fieldset><legend><h2>收货地址管理</h2></legend>'
         entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
@@ -253,14 +251,12 @@ def transConfirmHtml(address_ret,proditems):
             html_phone = i.phone
             html_city  = i.city 
             html_address  = i.address
-            html_postcode  = i.postcode
             html_defaults= i.defaults
             address = html_city + ' ' +  html_address
             h = h + '<font>' + '收货地址选择：' + '<input type="Radio" name="choice" value="%s">'%html_nid + display_space
             h = h + '<font>' + '姓名：' + html_name + '</font>' + display_space
             h = h + '<font>' + '电话：' + html_phone + '</font>' + display_space
-            h = h + '<font>' + '收货地址：' + address + '</font>' + display_space
-            h = h + '<font>' + '邮政编码：' + html_postcode + '</font>' + '<br>'
+            h = h + '<font>' + '收货地址：' + address + '</font>' + '<br>'
         h = h  + '</h4>'
         money_full = proditems['money_full']
         carriage = proditems['carriage']
@@ -285,7 +281,7 @@ def transConfirmHtml(address_ret,proditems):
             price = price + parameter_price            
             h = h + '<img src="data:image/jpg;base64,%s"/>'%thumbnail + display_space
             h = h + '<font>' + '名称：' + name + '</font>' + display_space
-            h = h + '<font>' + '价格：' + str(discount) + '</font>' + display_space
+            h = h + '<font>' + '价格：￥' + str(discount) + '</font>' + display_space
             h = h + '<font>' + '规格描述：' + description + '</font>' + display_space
             h = h + '<font>' + '购买数量：' + str(num) + '</font>' + '<br>'
         h = h + '</h4>'     
@@ -295,15 +291,16 @@ def transConfirmHtml(address_ret,proditems):
             carriage = int(carriage)
         total_price = price + carriage
         if int(total_price*100) !=  int(total_price*100):
-            print('err err')
+            log.info('transConfirmHtml  err')
             return -2
-        h = h + '<font color="red"><h3>' + '配送方式：'+ '快递：'+'<input type="Radio" name="choice" value="1">' + '</h3></font>'
+        h = h + '<input type="hidden" name="proditems" value="%s">'%proditems
+        h = h + '<font color="red"><h3>' + '配送方式(默认快递)：'+ '快递：'+'<input type="Radio" name="send_way" value="1">' + '</h3></font>'
         h = h + '<font color="red"><h3>' + '卖家留言：' + '<input type="text" name="remark"/>' + '</h3></font>'
         h = h + '<font color="red"><h3>' + '共%s件商品'%j + display_space  + '小计：￥%s'%db_total_price + '</h3></font>' 
         welcome = u'<fieldset><legend><h2>确认订单</h2></legend>'
         entry_time = u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         carriage =  '<font color="red">'  + '运费：￥' + str(carriage) + '</font>' + display_space
-        total_price = '<font color="red">'  + '合计：' + str(total_price) + '</font>' + display_space
+        total_price = '<font color="red">'  + '合计：￥' + str(total_price) + '</font>' + display_space
         payment = '<input type="submit" name="buy" value="提交订单"/>'  +'<br>' +'<br>'
         h = welcome+ h +'<h3>' +carriage + total_price  + payment + entry_time + '</h3>'
         return h

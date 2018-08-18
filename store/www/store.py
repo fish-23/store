@@ -223,6 +223,38 @@ def transaction_confirm():
             return red_writing_1(u'购买异常，请联系网站工作人员', '/',u'返回主页')        
         return trans_ret         
 
+@app.route('/api/v1/transaction_create', method="post")
+def transaction_create():
+        login_name = request.get_cookie('login_name', secret = 'asf&*181183')
+        checkret = checkLogin(login_name)
+        if checkret == -1:
+            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
+        if checkret == -2:
+            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        address_id = request.forms.get('choice')
+        send_way = request.forms.get('send_way')
+        remark = request.forms.get('remark')
+        proditems = request.forms.get('proditems')
+        proditems = proditems.replace("'","\"")
+        proditems = json.loads(proditems)
+        trans_ret = transCreate(proditems,address_id,send_way,remark,login_name)
+        if trans_ret == -1:
+            return red_writing_1(u'请选择收货地址', '/shopping_cart',u'点击返回购物车')
+        redirect('/transaction_pay/%s'%trans_ret)
+
+@app.route('/transaction_pay/<nid>')
+def transaction_pay(nid):
+        login_name = request.get_cookie('login_name', secret = 'asf&*181183')
+        checkret = checkLogin(login_name)
+        if checkret == -1:
+            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
+        if checkret == -2:
+            return red_writing_1(u'用户不存在', '/register',u'点击注册')      
+        trans_ret = tranPay(nid,login_name)
+        if trans_ret == -1:
+            return red_writing_1(u'只能支付自己的订单', '/',u'返回主页')
+
+
 
 @app.route('/address_add')
 def address_add():
@@ -247,18 +279,14 @@ def address_add():
         phone = request.forms.get('phone')
         city = request.forms.get('city')
         address = request.forms.get('address')
-        postcode = request.forms.get('postcode')
         defaults = request.forms.get('defaults')
-        add_ret = addressAdd(name,phone,city,address,postcode,defaults,login_name)
+        add_ret = addressAdd(name,phone,city,address,defaults,login_name)
         if add_ret == -1:
             return red_writing_1(u'填写的数据不能为空', '/address_add',u'返回')
         if add_ret == -2:
             return red_writing_1(u'选择是否设置为默认地址', '/address_add',u'返回')
         if add_ret == -3:
             return red_writing_1(u'手机号格式不正确','/address_add',u'返回')             
-        if add_ret == -4:
-            return red_writing_1(u'邮编为6位纯数字','/address_add',u'返回')
-            return red_writing_1(u'邮编为6位纯数字','/address_add',u'返回')
         return red_writing_2(u'收货地址添加成功','/address_list',u'收货地址管理', '/shopping_cart',u'返回购物车')
 
 @app.route('/address_list')
