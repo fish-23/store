@@ -15,8 +15,6 @@ class Address(BaseModel):
     city = TextField()
     # 地址
     address = TextField()
-    # 邮编
-    postcode = CharField(null=True)
     # 默认地址
     defaults = IntegerField(default = 0)
     # 所属用户
