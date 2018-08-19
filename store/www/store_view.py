@@ -21,7 +21,7 @@ def red_writing_1(msg,addr,msg2):
 
 def red_writing_2(msg,addr,msg2,addr2,msg3):
         # red_writing_2(u'用户名不能为空','/login',u'点击重新登录','/todo',u'点击进入todo主页')
-	return u'<font color="red"><h3>%s</h3></font><br> <a href="%s"><h3>%s</h3></a> <a href="%s"><h3>%s</h3></a>'%(msg,addr,msg2,addr2,msg3)
+	return u'<font color="red"><h3>%s</h3></font>'%(msg)+'<br>'+' <a href="%s"><h3>%s</h3><a href="%s"><h3>%s</h3></a>'%(addr,msg2,addr2,msg3)
 
 def red_writing_3(msg,addr,msg2,addr2,msg3,addr3,msg4):
 	return u'<html><font color="red"><h3>%s</h3></font></html><br> <a href="%s"><h3>%s</h3></a> \
@@ -186,6 +186,8 @@ def cartHtml(cart_info,carriage_info):
             carriage = 0
         else:
             carriage = carriage
+        if cart_info.count() == 0:
+            carriage = 0
         total_price = price + carriage
         proditems = {}
         proditems['price'] = price
@@ -223,7 +225,7 @@ def addressListHrml(address_ret):
             html_defaults= i.defaults
             address = html_city + ' ' +  html_address
             if int(html_defaults) == 0:
-                h = h + '<font>' + '设置为默认地址：' + '<input type="Radio" name="defaults" value="%s">'%html_nid + display_space
+                h = h + '<font>' + '默认地址选择：' + '<input type="Radio" name="defaults" value="%s">'%html_nid + display_space
             h = h + '<font>' + '姓名：' + html_name + '</font>' + display_space
             h = h + '<font>' + '电话：' + html_phone + '</font>' + '<br>'
             h = h + '<font>' + '收货地址：' + address + '</font>' + display_space
@@ -231,7 +233,7 @@ def addressListHrml(address_ret):
         welcome = u'<fieldset><legend><h2>收货地址管理</h2></legend>'
         entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         add_link = u'<a href="/address_add">点击添加</a ><body></html>'
-        set_up = '<input type="submit" value="设置"/>'
+        set_up = '<input type="submit" value="设置为默认收货地址"/>'
         index_link = u'<a href="/">点击返回主页</a ><body></html>'+ '<br>'
         h = welcome+ h + set_up  + '<br>' + add_link + display_space + index_link + entry_time
         return h
@@ -296,7 +298,7 @@ def transConfirmHtml(address_ret,proditems):
         h = h + '<input type="hidden" name="proditems" value="%s">'%proditems
         h = h + '<font color="red"><h3>' + '配送方式(默认快递)：'
         h = h + '快递：'+'<input type="Radio" name="send_way" value="快递">' + '</h3></font>'
-        h = h + '<font color="red"><h3>' + '卖家留言：' + '<input type="text" name="remark"/>' + '</h3></font>'
+        h = h + '<font color="red"><h3>' + '买家留言：' + '<input type="text" name="remark"/>' + '</h3></font>'
         h = h + '<font color="red"><h3>' + '共%s件商品'%j + display_space  + '小计：￥%s'%db_total_price + '</h3></font>' 
         welcome = u'<fieldset><legend><h2>确认订单</h2></legend>'
         entry_time = u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
@@ -333,12 +335,14 @@ def tranPayHtml(trans_ret,payments_ret):
         h = h + '<h4>'
         trade_id = trans_ret.trade_id
         h = h   +'<font color="red">' + '<h3>' + '订单编号：'+ trade_id + '</h3>'  + '</font>'
+        trans_id = trans_ret.id
+        h = h + '<input type="hidden" name="trans_id" value="%s">'%trans_id
         created_time = str(trans_ret.created_time)
         h = h   +'<font color="red">' + '<h3>' + '下单时间：'+ created_time + '</h3>'  + '</font>'
         send_way = trans_ret.send_way
         h = h   +'<font color="red">' + '<h3>' + '配送方式：'+ send_way + '</h3>'  + '</font>'
-        h = h + '<font color="red"><h3>' + '支付方式(默认微信)：'
-        h = h + '微信：'+'<input type="Radio" name="pay_way" value="1">' + '</h3></font>'
+        h = h + '<font color="red"><h3>' + '支付方式(默认余额)：'
+        h = h + '余额：'+'<input type="Radio" name="pay_way" value="1">' + '</h3></font>'
         total_price = trans_ret.total_price
         carriage = trans_ret.carriage
         price = total_price - carriage
@@ -350,6 +354,34 @@ def tranPayHtml(trans_ret,payments_ret):
         pay = '<input type="submit" name="pay" value="去支付"/>' + '<br>' + '<br>'
         cancel_trans = '<input type="submit" name="cancel_trans" value="取消订单"/>'+ display_space
         h = welcome+ h + price + carriage + total_price  + '<br>'  + cancel_trans + pay + entry_time
+        return h
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+
+# 个人中心
+def userListHtml(user_info,address_info,trans_info):
+    try:
+        h = u'<html><body>'
+        h = h + '<font color="red"><h3>' + '个人信息' + display_space + '<a href="/">修改</a>' + '</font></h3>'
+        user_nickname = user_info.nickname
+        user_avatur = user_info.avatur
+        user_balance = user_info.balance
+        user_integral = user_info.integral
+        h = h + '<h3>'
+        h = h + '<img src="data:image/jpg;base64,%s">'%user_avatur + display_space
+        h = h + '<font color="blue">' + user_nickname + '</font>' + display_space
+        h = h + '<font color="blue">' + '余额：￥' + str(user_balance) + '</font>' + display_space
+        h = h + '<font color="blue">' + '积分：' + str(user_integral) + '</font>' + '<br>' + '<br>'
+        h = h + '</h3>'        
+        h = h + '<font color="red"><h3>' + '我的订单' + display_space + '<a href="/">查看详情</a>' + '</font></h3><br>'
+        h = h + '<font color="red"><h3>' + '收货地址' + display_space + '<a href="/address_list">查看详情</a>' + '</font></h3><br>'
+        welcome = u'<fieldset><legend><h2>个人中心</h2></legend>'
+        time_now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        entry_time = '<h3>' + u'进入时间:' + display_space +'%s'%(time_now) + '</h3>'
+        index_link = u'<a href="/">进入主页</a ><body></html>'+ '</h3>'
+        product_link = '<h3>' + u'<a href="/product_list/none">进入产品列表</a ><body></html>' + display_space
+        h = welcome + h + product_link + index_link + entry_time
         return h
     except Exception as e:
         log.error(traceback.format_exc())

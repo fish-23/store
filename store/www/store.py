@@ -175,7 +175,7 @@ def product_details():
         if checkret == 1:
             return red_writing_2(u'加入购物车成功','/product_list/none',u'点击继续购买','/shopping_cart',u'点击进入购物车')
         if checkret == -5:
-            return '商品立即购买'
+            return red_writing_1(u'商品立即购买。功能开发中','/',u'返回主页')
 
 
 # 购物车
@@ -204,7 +204,7 @@ def shopping_cart_del(nid):
         redirect('/shopping_cart')
 
 
-# 订单
+# 确认订单
 @app.route('/api/v1/transaction_confirm', method="post")
 def transaction_confirm():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
@@ -223,8 +223,9 @@ def transaction_confirm():
             return red_writing_1(u'请设置默认收货地址', '/address_list',u'点击设置')
         if trans_ret == -2:
             return red_writing_1(u'购买异常，请联系网站工作人员', '/',u'返回主页')        
-        return trans_ret         
-
+        return trans_ret     
+    
+# 创建订单
 @app.route('/api/v1/transaction_create', method="post")
 def transaction_create():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
@@ -241,23 +242,45 @@ def transaction_create():
         proditems = proditems.replace("'","\"")
         proditems = json.loads(proditems)
         trans_ret = transCreate(proditems,address_id,send_way,remark,login_name)
-        redirect('/transaction_pay/%s'%trans_ret)
+        cart_clear = cartClear(trans_ret) 
+        redirect('/transaction_details/%s'%trans_ret)
 
-@app.route('/transaction_pay/<nid>')
-def transaction_pay(nid):
+# 订单详情
+@app.route('/transaction_details/<nid>')
+def transaction_details(nid):
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
         checkret = checkLogin(login_name)
         if checkret == -1:
             return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
         if checkret == -2:
             return red_writing_1(u'用户不存在', '/register',u'点击注册')      
-        trans_ret = tranPay(nid,login_name)
+        trans_ret = tranDetails(nid,login_name)
         if trans_ret == -1:
             return red_writing_1(u'只能支付自己的订单', '/',u'返回主页')
         return trans_ret
 
 
+# 订单支付
+@app.route('/api/v1/pay_ready', method="post")
+def transaction_create():
+        login_name = request.get_cookie('login_name', secret = 'asf&*181183')
+        checkret = checkLogin(login_name)
+        if checkret == -1:
+            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
+        if checkret == -2:
+            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        trans_id = request.forms.get('trans_id')
+        trans_cancel = request.forms.get('cancel_trans')
+        pay = request.forms.get('pay')
+        check_ret = checkPayCancel(trans_id,trans_cancel,pay,login_name)
+        if check_ret == -1:
+            return red_writing_1(u'订单已取消', '/',u'返回主页')
+        if check_ret == -2:
+            return red_writing_1(u'账户余额不足，请联系管理员充值', '/',u'返回主页')
+        return red_writing_2(u'订单支付成功','/transaction_list',u'查看订单(功能开发中)', '/',u'点击返回主页')
 
+
+# 收货地址
 @app.route('/address_add')
 def address_add():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
@@ -331,8 +354,14 @@ def address_del(nid):
 # 个人中心
 @app.route('/user_list')
 def user_list():
-        redirect('/address_list')
-        return red_writing_1(u'功能开发中','/',u'点击返回')
+        login_name = request.get_cookie('login_name', secret = 'asf&*181183')
+        checkret = checkLogin(login_name)
+        if checkret == -1:
+            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
+        if checkret == -2:
+            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        ret = userList(login_name)
+        return ret
 
 
 @app.error(404)

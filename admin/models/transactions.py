@@ -22,6 +22,8 @@ class Transactions(BaseModel):
     trade_id = CharField(unique=True)
     # 删除状态(0未删除，-1已删除)
     del_status = IntegerField(default=0)
+    # 删除时间
+    del_time = = DateTimeField(null=True)
     # 订单状态(1待付款, 2已付款, 3待收货, 4已收货, 5待发货, 6已发货, 7退款中, 8退款完成)
     trade_status = IntegerField()    
     # 描述

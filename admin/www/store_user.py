@@ -167,6 +167,8 @@ def saveProduct(name, num, price, discount, description, user_name, category):
 
 def findProduct(name):
     try:
+        log.info('1111111')
+        log.info(name)
         owner_info = Users.get(Users.name == name)
         owner_id = owner_info.id
         group = Groups.get(Groups.owner == owner_id,Groups.del_status==0)
