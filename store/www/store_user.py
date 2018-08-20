@@ -407,7 +407,7 @@ def cartDel(login_name,nid):
         log.error(traceback.format_exc())
 
 
-# 订单
+# 订单确认
 def transConfirm(proditems,login_name):
     try:
         user_id = userId(login_name)
@@ -473,7 +473,7 @@ def cartClear(trans_id):
     except Exception as e:
         log.error(traceback.format_exc())
 
-
+# 订单创建
 def transCreate(proditems,address_id,send_way,remark,login_name):
     try:
         user_id = userId(login_name)
@@ -491,6 +491,7 @@ def transCreate(proditems,address_id,send_way,remark,login_name):
     except Exception as e:
         log.error(traceback.format_exc())    
 
+# 订单详情
 def tranDetails(nid,login_name):
     try:
         user_id = userId(login_name)
@@ -504,21 +505,23 @@ def tranDetails(nid,login_name):
     except Exception as e:
         log.error(traceback.format_exc())
 
+# 取消订单
 def transCancel(trans_id):
-    trans_info = Transactions.get(Transactions.id == trans_id)
+    trans_info = Transactions.get(Transactions.id == trans_id,Transactions.del_status == 0)
     trans_info.del_status = -1
     import datetime
     time_now = datetime.datetime.now()
     trans_info.del_time = time_now
     trans_info.description = '用户取消订单'
     trans_info.save()
-    payments_info = Payments.select().where(Payments.transactions == trans_id)
+    payments_info = Payments.select().where(Payments.transactions == trans_id,Payments.del_status == 0)
     for i in payments_info:
         i.del_status = -1
         i.del_time = time_now
         i.description = '用户取消订单'
         i.save()
     return 0 
+
 
 def payTrans(trans_id,user_id):
     try:
@@ -537,7 +540,7 @@ def payTrans(trans_id,user_id):
     except Exception as e:
         log.error(traceback.format_exc())
 
-
+# 订单支付
 def checkPayCancel(trans_id,trans_cancel,pay,login_name):
     try:
         user_id = userId(login_name)
@@ -551,6 +554,23 @@ def checkPayCancel(trans_id,trans_cancel,pay,login_name):
     except Exception as e:
         log.error(traceback.format_exc())
 
+# 订单列表
+def tranList(login_name):
+    try:
+        user_id = userId(login_name)
+        trans_info = Transactions.select().where(Transactions.users == user_id,Transactions.del_status == 0)
+        return tranListHtml(trans_info) 
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+
+#用户中心
+def userList(login_name):
+    try:
+        user_info = Users.get(Users.name == login_name)
+        return userListHtml(user_info)
+    except Exception as e:
+        log.error(traceback.format_exc())
 
 # 收货地址
 def addressAdd(name,phone,city,address,defaults,login_name):
@@ -609,17 +629,5 @@ def addressDel(login_name,nid):
             return -1
         address_info.delete_instance()
         return 0
-    except Exception as e:
-        log.error(traceback.format_exc())
-
-
-#用户中心
-def userList(login_name):
-    try:
-        user_info = Users.get(Users.name == login_name)
-        user_id = user_info.id
-        address_info = Address.select().where(Address.users == user_id)
-        trans_info = Transactions.select().where(Transactions.users == user_id)
-        return userListHtml(user_info,address_info,trans_info)        
     except Exception as e:
         log.error(traceback.format_exc())

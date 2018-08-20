@@ -9,7 +9,8 @@ sys.path.append('../')
 sys.path.append('/root')
 from log import *
 from config import *
-
+from models.transactions import *
+from models.payments import *
 
 display_space = '&nbsp' + '&nbsp' + '&nbsp' + '&nbsp' + '&nbsp' + '&nbsp'
 
@@ -245,7 +246,7 @@ def transConfirmHtml(address_ret,proditems):
     try:
         h = u'<html><body>'
         h = h + '<form action="/api/v1/transaction_create" method="post" enctype="multipart/form-data">'
-        h = h + '<font color="red">' + '<h3>' + '收货地址选择'+ '</h3>'  + '</font>'
+        h = h + '<font color="red">' + '<h3>' + '收货地址'+ '</h3>'  + '</font>'
         h = h + '<h4>'
         for i in address_ret:
             html_nid = i.id
@@ -314,6 +315,11 @@ def tranPayHtml(trans_ret,payments_ret):
     try:
         h = u'<html><body>'
         h = h + '<form action="/api/v1/pay_ready" method="post" enctype="multipart/form-data">'
+        created_time = trans_ret.created_time
+        time_stamp = int(created_time.timestamp())
+        now_time = int(time.time())
+        remain_time = (7200 - (now_time -time_stamp))//60
+        h = h + '<font color="blue"><h4>'+ '支付剩余时间：'+ str(remain_time) + '分钟' + '</font>'
         h = h + '<font color="red">' + '<h3>' + '收货地址'+ '</h3>'  + '</font>'
         address = trans_ret.address
         address = address.split(',')
@@ -360,10 +366,10 @@ def tranPayHtml(trans_ret,payments_ret):
 
 
 # 个人中心
-def userListHtml(user_info,address_info,trans_info):
+def userListHtml(user_info):
     try:
         h = u'<html><body>'
-        h = h + '<font color="red"><h3>' + '个人信息' + display_space + '<a href="/">修改</a>' + '</font></h3>'
+        h = h + '<font color="red"><h3>' + '个人信息(功能开发中)' + display_space + '<a href="/">修改</a>' + '</font></h3>'
         user_nickname = user_info.nickname
         user_avatur = user_info.avatur
         user_balance = user_info.balance
@@ -374,7 +380,7 @@ def userListHtml(user_info,address_info,trans_info):
         h = h + '<font color="blue">' + '余额：￥' + str(user_balance) + '</font>' + display_space
         h = h + '<font color="blue">' + '积分：' + str(user_integral) + '</font>' + '<br>' + '<br>'
         h = h + '</h3>'        
-        h = h + '<font color="red"><h3>' + '我的订单' + display_space + '<a href="/">查看详情</a>' + '</font></h3><br>'
+        h = h + '<font color="red"><h3>'+'我的订单'+display_space + '<a href="/transaction_list">查看详情</a>' + '</font></h3><br>'
         h = h + '<font color="red"><h3>' + '收货地址' + display_space + '<a href="/address_list">查看详情</a>' + '</font></h3><br>'
         welcome = u'<fieldset><legend><h2>个人中心</h2></legend>'
         time_now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -382,6 +388,77 @@ def userListHtml(user_info,address_info,trans_info):
         index_link = u'<a href="/">进入主页</a ><body></html>'+ '</h3>'
         product_link = '<h3>' + u'<a href="/product_list/none">进入产品列表</a ><body></html>' + display_space
         h = welcome + h + product_link + index_link + entry_time
+        return h
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+
+# 订单列表
+def tranListHtmlShow(trans_info,h):
+    try:
+        if trans_info.count():
+            trans_id = [i.id for i in trans_info]
+            for item in trans_id:
+                trans_ret = Transactions.get(Transactions.id == item)
+                created_time = trans_ret.created_time
+                time_stamp = int(created_time.timestamp())
+                now_time = int(time.time())
+                if trans_ret.trade_status == 1:
+                    if (now_time -time_stamp) > 7200:
+                        from  store_user import transCancel
+                        transCancel(item)
+                        continue                
+                total_price = trans_ret.total_price
+                carriage = trans_ret.carriage
+                trade_id = trans_ret.trade_id                
+                h = h + '<font color="blue"><h4>'+ '订单号：'+ trade_id + display_space + str(created_time) + '</h4></font>'
+                if trans_ret.trade_status == 1:
+                    remain_time = (7200 - (now_time -time_stamp))//60
+                    h = h + '<font color="purple"><h4>'+ '支付剩余时间：'+ str(remain_time) + '分钟' + '</font>' + display_space
+                    h = h + '<a href="/transaction_details/' + str(item) + u'">点击付款</a>'+ '</h4>'
+                payments_info = Payments.select().where(Payments.transactions == item,Payments.del_status == 0)
+                for i in payments_info:
+                    name = i.products.name
+                    thumbnail = i.products.thumbnail
+                    discount = i.parameters.discount
+                    description = i.parameters.description
+                    num = i.num
+                    h = h + '<h4>'
+                    h = h + '<img src="data:image/jpg;base64,%s"/>'%thumbnail + display_space
+                    h = h + '<font>' + '名称：' + name + '</font>' + display_space
+                    h = h + '<font>' + '价格：￥' + str(discount) + '</font>' + display_space
+                    h = h + '<font>' + '规格描述：' + description + '</font>' + display_space
+                    h = h + '<font>' + '购买数量：' + str(num) + '</font>'
+                    h = h + '</h4>'+'<br>'
+        return h
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+def tranListHtml(trans_info):
+    try:
+        h = u'<html><body>'
+        h = h + '<form action="/api/v1/pay_ready" method="post" enctype="multipart/form-data">'
+        h = h + '<font color="red"><h3>' + '待付款' + '</font></h3>'
+        trans_ret = trans_info.where(Transactions.trade_status == 1)
+        h = tranListHtmlShow(trans_ret,h)        
+        h = h + '<font color="red"><h3>' + '待发货' + '</font></h3>' 
+        trans_ret = trans_info.where(Transactions.trade_status << [2,5])
+        h = tranListHtmlShow(trans_ret,h)
+        h = h + '<font color="red"><h3>' + '待收货' + '</font></h3>'     
+        trans_ret = trans_info.where(Transactions.trade_status << [3,6])
+        h = tranListHtmlShow(trans_ret,h)        
+        h = h + '<font color="red"><h3>' + '已完成' + '</font></h3>'     
+        trans_ret = trans_info.where(Transactions.trade_status << [4,7,8])
+        h = tranListHtmlShow(trans_ret,h)
+        h = h + '<font color="red"><h3>' + '已取消' + '</font></h3>'     
+        trans_ret = trans_info.where(Transactions.del_status == -1)
+        h = tranListHtmlShow(trans_ret,h)
+        welcome = u'<fieldset><legend><h2>我的订单</h2></legend>'
+        time_now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        entry_time = '<h3>' + u'进入时间:' + display_space +'%s'%(time_now) + '</h3>'        
+        index_link = u'<a href="/">进入主页</a ><body></html>'+ '</h3>'
+        user_link = '<h3>' + u'<a href="/user_list">进入个人中心</a ><body></html>' + display_space    
+        h = welcome + h + user_link + index_link + entry_time
         return h
     except Exception as e:
         log.error(traceback.format_exc())

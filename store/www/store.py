@@ -259,6 +259,18 @@ def transaction_details(nid):
             return red_writing_1(u'只能支付自己的订单', '/',u'返回主页')
         return trans_ret
 
+# 订单列表
+@app.route('/transaction_list')
+def transaction_list():
+        login_name = request.get_cookie('login_name', secret = 'asf&*181183')
+        checkret = checkLogin(login_name)
+        if checkret == -1:
+            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
+        if checkret == -2:
+            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        trans_ret = tranList(login_name)
+        return trans_ret
+
 
 # 订单支付
 @app.route('/api/v1/pay_ready', method="post")
@@ -277,7 +289,7 @@ def transaction_create():
             return red_writing_1(u'订单已取消', '/',u'返回主页')
         if check_ret == -2:
             return red_writing_1(u'账户余额不足，请联系管理员充值', '/',u'返回主页')
-        return red_writing_2(u'订单支付成功','/transaction_list',u'查看订单(功能开发中)', '/',u'点击返回主页')
+        return red_writing_2(u'订单支付成功','/transaction_list',u'查看订单', '/',u'点击返回主页')
 
 
 # 收货地址
