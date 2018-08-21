@@ -184,6 +184,17 @@ def userId(login_name):
         log.error(traceback.format_exc())
 
 
+def lisAppend(cellphone,sms_num,send_time):
+    try:
+        lis = []
+        lis.append(cellphone)
+        lis.append(sms_num)
+        lis.append(send_time)
+        return lis
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+
 # register
 async def sendInfo(ipaddr):
     try:
@@ -417,6 +428,9 @@ def transConfirm(proditems,login_name):
         address_ret = address_ret.where(Address.defaults == 1)
         if address_ret.count() == 0:
             return -3
+        lis = proditems['lis']
+        if lis == []:
+            return -4
         return transConfirmHtml(address_ret,proditems)        
     except Exception as e:
         log.error(traceback.format_exc())
@@ -509,6 +523,7 @@ def tranDetails(nid,login_name):
 def transCancel(trans_id):
     trans_info = Transactions.get(Transactions.id == trans_id,Transactions.del_status == 0)
     trans_info.del_status = -1
+    trans_info.trade_status = 0
     import datetime
     time_now = datetime.datetime.now()
     trans_info.del_time = time_now
@@ -559,7 +574,7 @@ def tranList(login_name):
     try:
         user_id = userId(login_name)
         trans_info = Transactions.select().where(Transactions.users == user_id,Transactions.del_status == 0)
-        return tranListHtml(trans_info) 
+        return tranListHtml(trans_info,user_id) 
     except Exception as e:
         log.error(traceback.format_exc())
 

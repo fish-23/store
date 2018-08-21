@@ -50,10 +50,7 @@ def register():
         if ret == -1:
             return red_writing_1(u'每个IP每天最多接收5条短信','/',u'点击返回主页')
         sendsmsret = registerSendSms(cellphone,ret[0])
-        lis = []
-        lis.append(cellphone)
-        lis.append(sendsmsret)
-        lis.append(ret[1])
+        lis = lisAppend(cellphone,sendsmsret,ret[1])
         response.set_cookie('register_info', lis, domain='www.fish-23.com', path = '/', secret = 'asf&*4561')
         redirect('/register_add')
 
@@ -216,13 +213,17 @@ def transaction_confirm():
         proditems = request.forms.get('proditems')
         proditems = proditems.replace("'","\"")
         proditems = json.loads(proditems)
+        #return proditems
         trans_ret = transConfirm(proditems, login_name)
         if trans_ret == -1:
             return red_writing_1(u'请添加收货地址', '/address_add',u'点击添加')
         if trans_ret == -3:
             return red_writing_1(u'请设置默认收货地址', '/address_list',u'点击设置')
         if trans_ret == -2:
-            return red_writing_1(u'购买异常，请联系网站工作人员', '/',u'返回主页')        
+            return red_writing_1(u'购买异常，请联系网站工作人员', '/',u'返回主页')  
+        if trans_ret == -4:
+            return red_writing_1(u'无商品购买', '/',u'返回主页')
+      
         return trans_ret     
     
 # 创建订单

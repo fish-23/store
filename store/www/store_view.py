@@ -404,7 +404,7 @@ def tranListHtmlShow(trans_info,h):
                 time_stamp = int(created_time.timestamp())
                 now_time = int(time.time())
                 if trans_ret.trade_status == 1:
-                    if (now_time -time_stamp) > 7200:
+                    if (now_time -time_stamp) > 7200200:
                         from  store_user import transCancel
                         transCancel(item)
                         continue                
@@ -417,6 +417,8 @@ def tranListHtmlShow(trans_info,h):
                     h = h + '<font color="purple"><h4>'+ '支付剩余时间：'+ str(remain_time) + '分钟' + '</font>' + display_space
                     h = h + '<a href="/transaction_details/' + str(item) + u'">点击付款</a>'+ '</h4>'
                 payments_info = Payments.select().where(Payments.transactions == item,Payments.del_status == 0)
+                if trans_ret.del_status == -1:
+                     payments_info = Payments.select().where(Payments.transactions == item,Payments.del_status == -1)
                 for i in payments_info:
                     name = i.products.name
                     thumbnail = i.products.thumbnail
@@ -434,7 +436,7 @@ def tranListHtmlShow(trans_info,h):
     except Exception as e:
         log.error(traceback.format_exc())
 
-def tranListHtml(trans_info):
+def tranListHtml(trans_info,user_id):
     try:
         h = u'<html><body>'
         h = h + '<form action="/api/v1/pay_ready" method="post" enctype="multipart/form-data">'
@@ -451,7 +453,7 @@ def tranListHtml(trans_info):
         trans_ret = trans_info.where(Transactions.trade_status << [4,7,8])
         h = tranListHtmlShow(trans_ret,h)
         h = h + '<font color="red"><h3>' + '已取消' + '</font></h3>'     
-        trans_ret = trans_info.where(Transactions.del_status == -1)
+        trans_ret = Transactions.select().where(Transactions.users == user_id,Transactions.del_status == -1)
         h = tranListHtmlShow(trans_ret,h)
         welcome = u'<fieldset><legend><h2>我的订单</h2></legend>'
         time_now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
