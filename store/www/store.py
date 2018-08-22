@@ -43,13 +43,13 @@ def register():
 def register():
         cellphone = request.forms.get('cellphone')
         checkret = checkCellphone(cellphone)
-        if checkret == -1:
-            return red_writing_2(u'该手机号已注册','/login',u'点击登录','/',u'点击返回主页')
-        if checkret == -2:
-            return red_writing_1(u'手机号格式不正确','/register',u'点击重新输入')
+        if type(checkret)==int and checkret!=0:
+            if checkret == -10:
+                return mskeErrRedir(checkret,'register')     
+            return mskeErrRedir(checkret,'login','/')
         ret = checkIp()
-        if ret == -1:
-            return red_writing_1(u'每个IP每天最多接收5条短信','/',u'点击返回主页')
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'/')
         sendsmsret = registerSendSms(cellphone,ret[0])
         lis = lisAppend(cellphone,sendsmsret,ret[1])
         response.set_cookie('register_info', lis, domain='www.fish-23.com', path = '/', secret = 'asf&*4561')
@@ -64,8 +64,9 @@ def register_add():
 def register_add():
         info = request.get_cookie('register_info', secret = 'asf&*4561')
         log.info('/api/v1/register_add  info is %s'%info)
-        if checkRegCookie(info) == -1:
-            return red_writing_1(u'注册异常，异常的访问方式','/register',u'点击重新注册')
+        ret = checkRegCookie(info)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'/register')       
         name = request.forms.get('name')
         password = request.forms.get('password')
         password2 = request.forms.get('password2')
@@ -78,32 +79,16 @@ def register_add():
         nickname = nickname.strip()
         birthday = birthday.strip()
         picret = checkPic(avatur)
-        if picret == -1:
-            return red_writing_1(u'图片不能为空','/register_add',u'返回')
-        if picret == -2:
-            return red_writing_1(u'图片不能大于1M','/register_add',u'返回')
-        if picret == -3:
-            return red_writing_1(u'该文件不是真正的图片','/register_add',u'返回')
-        if picret == -4:
-            return red_writing_1(u'图片格式不是常用图片格式','/register_add',u'返回')
+        if type(picret)==int and picret!=0:
+            return mskeErrRedir(picret,'register_add')
         checkret = SaveInfo(name,password,password2,nickname,birthday,send_sms,gender,info)
-        if checkret == -1:
-            return red_writing_1(u'该用户名存在','/register_add',u'点击重新输入')
-        if checkret == -2:
-            return red_writing_1(u'两次密码不一致','/register_add',u'点击重新输入')
-        if checkret == -3:
-            return red_writing_1(u'账号密码格式错误，不能小于6位','/register_add',u'点击重新输入')
-        if checkret == -4:
-            return red_writing_1(u'昵称，生日不能小于1位','/register_add',u'点击重新输入')
-        if checkret == -5:
-            return red_writing_1(u'验证码错误','/register_add',u'点击重新输入')
-        if checkret == -6:
-            return red_writing_1(u'验证码是六位纯数字','/register_add',u'点击重新输入')
-        if checkret == -7:
-            return red_writing_1(u'验证码超时','/register',u'点击重新注册')
+        if type(checkret)==int and checkret!=0:
+            if checkret == -21:
+                return mskeErrRedir(checkret,'register')
+            return mskeErrRedir(checkret,'register_add')
         nid = checkret 
         saveImage(name, avatur, nid)   
-        return red_writing_1(u'注册成功','/login',u'点击登陆')
+        return mskeErrRedir(1,'login')
 
 
 # 用户登陆
@@ -118,12 +103,8 @@ def login():
         name = request.forms.get('name')
         password = request.forms.get('password')
         loginret = loginCheck(name, password)
-        if loginret == -1:
-            return red_writing_1(u'用户名密码不能为空','/login',u'点击重新登录')
-        if loginret == -2:
-            return red_writing_1(u'用户名不存在','/',u'点击返回主页')
-        if loginret == -3:
-            return red_writing_1(u'用户名密码不正确','/login',u'点击重新登录')
+        if type(loginret)==int and  loginret!=0:
+            return mskeErrRedir(loginret,'login','/')
         response.set_cookie('login_name', name, domain='www.fish-23.com', path = '/', secret = 'asf&*181183')
         redirect('/')
 
@@ -153,25 +134,20 @@ def product_details(nid):
 @app.route("/api/v1/product_details", method="post")
 def product_details():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        if checkLogin(login_name) == -1:
-            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
-        if checkLogin(login_name) == -2:
-            return red_writing_1(u'用户不存在', '/register',u'点击注册')    
+        ret =  checkLogin(login_name)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login','register')
         order_now = request.forms.get('buy')
         shopping_cart = request.forms.get('cart')
         parameter_id = request.forms.get('parameter')
         product_id = request.forms.get('html_nid')
         buy_num = request.forms.get('buynum')
         buy_num = buy_num.strip()
-        checkret = checkDetailsInfo(order_now,shopping_cart,product_id,parameter_id,buy_num,login_name) 
-        if checkret == -1:
-            return red_writing_1(u'购买数量不能为空','/product_details/%s'%product_id,u'点击返回')
-        if checkret == -2:
-            return red_writing_1(u'购买数量只能是纯数字，大于1小于100','/product_details/%s'%product_id,u'点击返回')
-        if checkret == -3:
-            return red_writing_1(u'请选择需要购买的规格','/product_details/%s'%product_id,u'点击返回')
-        if checkret == 1:
-            return red_writing_2(u'加入购物车成功','/product_list/none',u'点击继续购买','/shopping_cart',u'点击进入购物车')
+        checkret = checkDetailsInfo(order_now,shopping_cart,product_id,parameter_id,buy_num,login_name)
+        if type(checkret)==int and checkret!=0:
+            if checkret == 2:
+                return mskeErrRedir(checkret,'product_list','shopping_cart')
+            return mskeErrRedir(checkret,['product_details',product_id]) 
         if checkret == -5:
             return red_writing_1(u'商品立即购买。功能开发中','/',u'返回主页')
 
@@ -180,25 +156,21 @@ def product_details():
 @app.route('/shopping_cart')
 def shopping_cart():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        checkret = checkLogin(login_name)
-        if checkret == -1:
-            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
-        if checkret == -2:
-            return red_writing_1(u'用户不存在', '/register',u'点击注册')        
+        ret =  checkLogin(login_name)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login','register')
         h = cartInfo(login_name)
         return h
 
 @app.route('/shopping_cart_del/<nid>')
 def shopping_cart_del(nid):
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        checkret = checkLogin(login_name)
-        if checkret == -1:
-            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
-        if checkret == -2:
-            return red_writing_1(u'用户不存在', '/register',u'点击注册')
-        del_ret = cartDel(login_name,nid)        
-        if del_ret == -1:
-            return red_writing_1(u'只能删除自己的购物车产品', '/shopping_cart',u'点击返回')
+        ret =  checkLogin(login_name)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login','register')
+        del_ret = cartDel(login_name,nid) 
+        if type(del_ret)==int and del_ret!=0:
+            return mskeErrRedir(del_ret,'shopping_cart')       
         redirect('/shopping_cart')
 
 
@@ -206,36 +178,26 @@ def shopping_cart_del(nid):
 @app.route('/api/v1/transaction_confirm', method="post")
 def transaction_confirm():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        checkret = checkLogin(login_name)
-        if checkret == -1:
-            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
-        if checkret == -2:
-            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        ret =  checkLogin(login_name)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login','register')
         proditems = request.forms.get('proditems')
         proditems = proditems.replace("'","\"")
         proditems = json.loads(proditems)
-        #return proditems
         trans_ret = transConfirm(proditems, login_name)
-        if trans_ret == -1:
-            return red_writing_1(u'请添加收货地址', '/address_add',u'点击添加')
-        if trans_ret == -3:
-            return red_writing_1(u'请设置默认收货地址', '/address_list',u'点击设置')
-        if trans_ret == -2:
-            return red_writing_1(u'购买异常，请联系网站工作人员', '/',u'返回主页')  
-        if trans_ret == -4:
-            return red_writing_1(u'无商品购买', '/',u'返回主页')
-      
+        if type(trans_ret)==int and trans_ret!=0:
+            if trans_ret == -25 or trans_ret == -22:
+                return mskeErrRedir(trans_ret,'/')
+            return mskeErrRedir(trans_ret,'login','register')
         return trans_ret     
     
 # 创建订单
 @app.route('/api/v1/transaction_create', method="post")
 def transaction_create():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        checkret = checkLogin(login_name)
-        if checkret == -1:
-            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
-        if checkret == -2:
-            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        ret =  checkLogin(login_name)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login','register')
         address_id = request.forms.get('choice')
         send_way = request.forms.get('send_way')
         print('send_way',send_way)
@@ -251,11 +213,9 @@ def transaction_create():
 @app.route('/transaction_details/<nid>')
 def transaction_details(nid):
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        checkret = checkLogin(login_name)
-        if checkret == -1:
-            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
-        if checkret == -2:
-            return red_writing_1(u'用户不存在', '/register',u'点击注册')      
+        ret =  checkLogin(login_name)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login','register')
         trans_ret = tranDetails(nid,login_name)
         if trans_ret == -1:
             return red_writing_1(u'只能支付自己的订单', '/',u'返回主页')
@@ -265,11 +225,9 @@ def transaction_details(nid):
 @app.route('/transaction_list')
 def transaction_list():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        checkret = checkLogin(login_name)
-        if checkret == -1:
-            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
-        if checkret == -2:
-            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        ret =  checkLogin(login_name)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login','register')
         trans_ret = tranList(login_name)
         return trans_ret
 
@@ -278,75 +236,59 @@ def transaction_list():
 @app.route('/api/v1/pay_ready', method="post")
 def transaction_create():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        checkret = checkLogin(login_name)
-        if checkret == -1:
-            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
-        if checkret == -2:
-            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        ret =  checkLogin(login_name)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login','register')
         trans_id = request.forms.get('trans_id')
         trans_cancel = request.forms.get('cancel_trans')
         pay = request.forms.get('pay')
         check_ret = checkPayCancel(trans_id,trans_cancel,pay,login_name)
-        if check_ret == -1:
-            return red_writing_1(u'订单已取消', '/',u'返回主页')
-        if check_ret == -2:
-            return red_writing_1(u'账户余额不足，请联系管理员充值', '/',u'返回主页')
-        return red_writing_2(u'订单支付成功','/transaction_list',u'查看订单', '/',u'点击返回主页')
+        if type(check_ret)==int and check_ret!=0:
+            return mskeErrRedir(check_ret,'/')
+        return mskeErrRedir(3,'/transaction_list', '/')
 
 
 # 收货地址
 @app.route('/address_add')
 def address_add():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        checkret = checkLogin(login_name)
-        if checkret == -1:
-            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
-        if checkret == -2:
-            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        ret =  checkLogin(login_name)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login','register')
         address_html = read_file("templates/address_add.html")
         return address_html
 
 @app.route('/api/v1/address_add', method="post")
 def address_add():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        checkret = checkLogin(login_name)
-        if checkret == -1:
-            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
-        if checkret == -2:
-            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        ret =  checkLogin(login_name)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login','register')
         name = request.forms.get('name')
         phone = request.forms.get('phone')
         city = request.forms.get('city')
         address = request.forms.get('address')
         defaults = request.forms.get('defaults')
         add_ret = addressAdd(name,phone,city,address,defaults,login_name)
-        if add_ret == -1:
-            return red_writing_1(u'填写的数据不能为空', '/address_add',u'返回')
-        if add_ret == -2:
-            return red_writing_1(u'选择是否设置为默认地址', '/address_add',u'返回')
-        if add_ret == -3:
-            return red_writing_1(u'手机号格式不正确','/address_add',u'返回')             
-        return red_writing_2(u'收货地址添加成功','/address_list',u'收货地址管理', '/shopping_cart',u'返回购物车')
+        if type(add_ret)==int and add_ret!=0:
+            return mskeErrRedir(add_ret,'address_add')
+        return mskeErrRedir(4,'address_list', 'shopping_cart')
 
 @app.route('/address_list')
 def address_list():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        checkret = checkLogin(login_name)
-        if checkret == -1:
-            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
-        if checkret == -2:
-            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        ret =  checkLogin(login_name)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login','register')
         h = addressList(login_name)  
         return h   
 
 @app.route('/api/v1/address_list', method="post")
 def address_list():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        checkret = checkLogin(login_name)
-        if checkret == -1:
-            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
-        if checkret == -2:
-            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        ret =  checkLogin(login_name)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login','register')
         nid = request.forms.get('defaults')
         ret = addressDefaults(nid,login_name)
         redirect('/address_list')
@@ -354,14 +296,12 @@ def address_list():
 @app.route('/address_del/<nid>')
 def address_del(nid):
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        checkret = checkLogin(login_name)
-        if checkret == -1:
-            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
-        if checkret == -2:
-            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        ret =  checkLogin(login_name)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login','register')
         del_ret = addressDel(login_name,nid)
-        if del_ret == -1:
-            return red_writing_1(u'只能删除自己的购物车产品', '/shopping_cart',u'点击返回')
+        if type(del_ret)==int and del_ret!=0:
+            return mskeErrRedir(del_ret,'shopping_cart')
         redirect('/address_list')
 
 
@@ -369,22 +309,22 @@ def address_del(nid):
 @app.route('/user_list')
 def user_list():
         login_name = request.get_cookie('login_name', secret = 'asf&*181183')
-        checkret = checkLogin(login_name)
-        if checkret == -1:
-            return red_writing_2(u'用户尚未登录','/login',u'点击登录', '/register',u'点击注册')
-        if checkret == -2:
-            return red_writing_1(u'用户不存在', '/register',u'点击注册')
+        ret =  checkLogin(login_name)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login','register')
         ret = userList(login_name)
         return ret
 
 
 @app.error(404)
 def err(err):
-	return red_writing_1(u'页面不存在','/',u'点击返回')
+        return mskeErrRedir(-37,'/')
+
 
 @app.error(405)
 def err(err):
-	return red_writing_1(u'访问方式不正确','/',u'点击返回')
+        return mskeErrRedir(-38,'/')
+
 
 class StripPathMiddleware(object):
 

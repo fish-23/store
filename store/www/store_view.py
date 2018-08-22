@@ -295,7 +295,7 @@ def transConfirmHtml(address_ret,proditems):
         total_price = price + carriage
         if int(total_price*100) !=  int(total_price*100):
             log.info('transConfirmHtml  err')
-            return -2
+            return -25
         h = h + '<input type="hidden" name="proditems" value="%s">'%proditems
         h = h + '<font color="red"><h3>' + '配送方式(默认快递)：'
         h = h + '快递：'+'<input type="Radio" name="send_way" value="快递">' + '</h3></font>'

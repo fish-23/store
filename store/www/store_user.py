@@ -10,6 +10,7 @@ import os
 import asyncio
 import hashlib
 import re
+import string
 sys.path.append('../')
 sys.path.append('/root')
 from log import *
@@ -39,7 +40,8 @@ from models.address import *
 
 # url重定向
 def mskeErrRedir(*info):
-    try:        
+    try:
+        print('777777')        
         print(info)
         long = len(info)
         err_msg = ERR[info[0]]
@@ -96,12 +98,12 @@ def mskeErrRedir(*info):
 def checkPic(pic):
     try:
         if pic == None:
-            return -1
+            return -15
         pic_size = pic.file   
         pic_size.seek(0,2)   
         pic_size = pic_size.tell()
         if pic_size > 1048000:
-            return -2
+            return -16
         pic_distinguish = pic.file
         bValid = True
         try:
@@ -109,11 +111,11 @@ def checkPic(pic):
         except:
             bValid = False 
         if bValid == False:
-            return -3
+            return -17
         pic_name, pic_ext = os.path.splitext(pic.filename)
         pic_ext = pic_ext.lower()
         if str(pic_ext) not in ['.jpeg', '.bmp', '.png', '.webp', '.gif', '.jpg']:
-            return -4
+            return -18
         return 0
     except Exception as e:
         log.error(traceback.format_exc())
@@ -173,7 +175,7 @@ def checkIp():
         if checktime > 86400:
             Ips.update(sendsms_time=time_now, num=0).where(Ips.ipaddr == ipaddr).execute()
         if dbnum > 4:
-            return -1
+            return -11
         lis = []
         lis.append(ipaddr)
         lis.append(time_now)
@@ -200,11 +202,11 @@ def checkCellphone(cellphone):
     try:
         selectphone = Users.select().where(Users.cellphone == cellphone).count()
         if selectphone != 0:
-            return -1
+            return -9
         phoneprefix = ['130','131','132','133','134','135','136','137','138','139','150','151', \
                        '152','153','156','158','159','170','183','182','181','185','186','187','188','189']
         if len(cellphone) != 11 or cellphone.isdigit() != True or cellphone[:3] not in phoneprefix:
-            return -2
+            return -10
         return 0
     except Exception as e:
         log.error(traceback.format_exc())
@@ -225,8 +227,11 @@ def checkPasswd(name,password,password2):
             return -1
         if password != password2:
             return -2
-        if name not in string.printable:
-            return -39
+        import re
+        re_check = re.compile(u'[\u4e00-\u9fa5]+')
+        check_ret = re_check.search(name)
+        if check_ret:
+            return -4
         if len(name) < 6 or name.isspace() == True:
             return -3
         if len(password) < 6 or password.isspace() == True:
@@ -285,7 +290,7 @@ def registerSendSms(cellphone,ipaddr):
 
 def checkRegCookie(info):
     if info == None:
-        return -1 
+        return -13 
 
 def checkNickBirth(nickname,birthday,send_sms,dbsend_sms,dbsend_time):
     try:
@@ -310,20 +315,22 @@ def SaveInfo(name,password,password2,nickname,birthday,send_sms,gender,info):
         dbsend_time = info[2]
         passwdret = checkPasswd(name,password,password2)
         if passwdret == -1:
-            return -1
+            return -4
         if passwdret == -2:
-            return -2
+            return -7
         if passwdret == -3:
-            return -3
+            return -8
+        if passwdret == -4:
+            return -39
         nickret = checkNickBirth(nickname,birthday,send_sms,dbsend_sms,dbsend_time) 
         if nickret == -1:
-            return -4
+            return -12
         if nickret == -2:
-            return -5
+            return -19
         if nickret == -3:
-            return -6
+            return -20
         if nickret == -4:
-            return -7
+            return -21
         password = hashlib.md5(password.encode('utf8')).hexdigest()
         userinfo = Users.create( name=name, password=password, nickname=nickname,
                                  birthday=birthday, cellphone=cellphone,gender=gender)
@@ -336,16 +343,16 @@ def SaveInfo(name,password,password2,nickname,birthday,send_sms,gender,info):
 def loginCheck(name, password):
     try:
         if name == '' or password == '':
-            return -1
+            return -5
         dbusers = Users.select().where(Users.name == name)
         if dbusers.count() == 0:
-            return -2
+            return -3
         dbusers = Users.get(Users.name == name)
         dbname = dbusers.name
         dbpassword = dbusers.password
         password = hashlib.md5(password.encode('utf8')).hexdigest()
         if dbname != name or dbpassword != password:
-            return -3
+            return -6
         import datetime
         login_time = datetime.datetime.now()
         cookie_num = name + ';' + '1'
@@ -424,13 +431,13 @@ def productDetails(nid):
 def checkDetailsInfo(order_now,shopping_cart,product_id,parameter_id,buy_num,login_name):
     try:
         if buy_num == '':
-            return -1
+            return -22
         if  buy_num.isnumeric() == False:
-            return -2
+            return -23
         if int(buy_num)<1 or int(buy_num)>100:
-            return -2
+            return -23
         if parameter_id == None:
-            return -3
+            return -24
         if order_now == '立即购买':
             return -5
         if str(shopping_cart) == '加入购物车':
@@ -454,7 +461,7 @@ def shoppingCartAdd(product_id,parameter_id,buy_num,login_name):
             num = int(db_num) + int(buy_num)
             num_info.num = num
             num_info.save()
-        return 1
+        return 2
     except Exception as e:
         log.error(traceback.format_exc())
 
@@ -473,7 +480,7 @@ def cartDel(login_name,nid):
         cart_info = ShoppingCart.get(ShoppingCart.id == nid)
         cart_user = cart_info.users.id
         if int(user_id) != int(cart_user):
-            return -1
+            return -27
         cart_info.delete_instance()
         return 0 
     except Exception as e:
@@ -486,13 +493,13 @@ def transConfirm(proditems,login_name):
         user_id = userId(login_name)
         address_ret = Address.select().where(Address.users == user_id)
         if address_ret.count() == 0:
-            return -1
+            return -32
         address_ret = address_ret.where(Address.defaults == 1)
         if address_ret.count() == 0:
-            return -3
+            return -33
         lis = proditems['lis']
         if lis == []:
-            return -4
+            return -22
         return transConfirmHtml(address_ret,proditems)        
     except Exception as e:
         log.error(traceback.format_exc())
@@ -623,11 +630,11 @@ def checkPayCancel(trans_id,trans_cancel,pay,login_name):
         user_id = userId(login_name)
         if trans_cancel == '取消订单':
             transCancel(trans_id)
-            return -1
+            return -29
         if pay == '去支付':
             pay_ret = payTrans(trans_id,user_id)
             if pay_ret == -1:
-                return -2
+                return -31
     except Exception as e:
         log.error(traceback.format_exc())
 
@@ -658,11 +665,11 @@ def addressAdd(name,phone,city,address,defaults,login_name):
         city = city.strip()
         address = address.strip()
         if name=='' or city=='' or address=='':
-            return -1
+            return -34
         if defaults == '':
-            return -2
+            return -35
         if checkCellphone(phone) == -2:
-            return -3
+            return -10
         defaults = int(defaults)
         if defaults == 1:
             address_ret = Address.select().where(Address.users == user_id,Address.defaults == 1)
@@ -703,7 +710,7 @@ def addressDel(login_name,nid):
         address_info = Address.get(Address.id == nid)
         address_user = address_info.users.id
         if int(user_id) != int(address_user):
-            return -1
+            return -27
         address_info.delete_instance()
         return 0
     except Exception as e:
