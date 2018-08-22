@@ -55,3 +55,10 @@
       解答：执行show full processlist观察state和info两列，查看有哪些线程在运行。经过查询发现之前远程删除的时候由于网络中断，锁表了。
             所以导致再次登录的时候删除操作无响应。这时候只要使用kill命令+对应线程前面id，将线程结束掉，就可以正常删除了。
             [参考文档](https://blog.csdn.net/cccheer/article/details/60480199)
+### 18，检测字符串中是否有汉字
+      解答：Python isalnum() 方法    检测汉字返回的是True  用此方法无法检测
+            import re
+            re_check = re.compile(u'[\u4e00-\u9fa5]+')
+            check_ret = re_check.search(name)
+            if check_ret:
+                return '有汉字'
