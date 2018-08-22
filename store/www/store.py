@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/local/python3
 # -*- coding: UTF-8 -*-
 
 import bottle
@@ -15,6 +15,7 @@ from config import *
 from PIL import Image
 from store_view import *
 from store_user import *
+from error import *
 from bottle import *
 
 

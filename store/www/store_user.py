@@ -18,6 +18,8 @@ from PIL import Image
 from random import randint
 from bottle import *
 from store_view import *
+from error import *
+from url import *
 from qcloudsms_py import SmsSingleSender
 from qcloudsms_py.httpclient import HTTPError
 
@@ -33,6 +35,61 @@ from models.shopping_cart import *
 from models.payments import *
 from models.transactions import *
 from models.address import *
+
+
+# url重定向
+def mskeErrRedir(*info):
+    try:        
+        print(info)
+        long = len(info)
+        err_msg = ERR[info[0]]
+        url = info[1]
+        print(url)
+        if long == 2:
+            if type(url) == list:
+                url_id = url[1]
+                url = url[0]
+                print('11111111')
+                print(url)
+                print(url_id)
+                urll = URL[url]
+                url_msg = URL_MSG[url]
+                return red_writing_1(err_msg,urll%url_id,url_msg)
+            urll = URL[url]
+            url_msg = URL_MSG[url]
+            return red_writing_1(err_msg,urll,url_msg)
+        if long == 3:
+            url2 = info[2]
+            if type(url) == list:
+                url_id = url[1]
+                url = url[0]
+                urll = URL[url]
+                url_msg = URL_MSG[url]
+                if type(url2) == list:
+                    url2_id = url2[1]
+                    url2 = url2[0]
+                    urll2 = URL[url2]
+                    url_msg2 = URL_MSG[url2]
+                    return red_writing_2(err_msg,urll%url_id,url_msg,urll2%url2_id,url_msg2)
+                urll = URL[url]
+                url_msg = URL_MSG[url]
+                urll2 = URL[url2]
+                url_msg2 = URL_MSG[url2]
+                return red_writing_2(err_msg,urll%url_id,url_msg,urll2,url_msg2)
+            urll = URL[url]
+            url_msg = URL_MSG[url]
+            if type(url2) == list:
+                url2_id = url2[1]
+                url2 = url2[0]
+                urll2 = URL[url2]
+                url_msg2 = URL_MSG[url2]
+                return red_writing_2(err_msg,urll,url_msg,urll2%url2_id,url_msg2)
+            urll2 = URL[url2]
+            url_msg2 = URL_MSG[url2]
+            return red_writing_2(err_msg,urll,url_msg,urll2,url_msg2)
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
 
 
 # 图片检测
@@ -145,7 +202,7 @@ def checkCellphone(cellphone):
         if selectphone != 0:
             return -1
         phoneprefix = ['130','131','132','133','134','135','136','137','138','139','150','151', \
-                       '152','153','156','158','159','170','183','182','181','185','186','188','189']
+                       '152','153','156','158','159','170','183','182','181','185','186','187','188','189']
         if len(cellphone) != 11 or cellphone.isdigit() != True or cellphone[:3] not in phoneprefix:
             return -2
         return 0
@@ -161,11 +218,15 @@ def done_callback(futu):
 # 用户名密码检测
 def checkPasswd(name,password,password2):
     try:
+        log.info(name)
+        log.info(len(name))
         dbusers = Users.select().where(Users.name == name)
         if dbusers.count() != 0:
             return -1
         if password != password2:
             return -2
+        if name not in string.printable:
+            return -39
         if len(name) < 6 or name.isspace() == True:
             return -3
         if len(password) < 6 or password.isspace() == True:
@@ -184,6 +245,7 @@ def userId(login_name):
         log.error(traceback.format_exc())
 
 
+# 列表生成
 def lisAppend(cellphone,sms_num,send_time):
     try:
         lis = []
