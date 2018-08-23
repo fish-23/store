@@ -134,7 +134,7 @@ def parametersHtml(findret, product_nid):
         welcome = u'<fieldset><legend><h2>规格列表</h2></legend>'
         entry_time = u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         add_link = '<br>' + u'<a href="/parameters_add/' + str(product_nid) + u'">点击添加</a ><body></html>' + display_space
-        product_link = u'<a href="/product_list">点击返回产品列表</a ><body></html>' + display_space
+        product_link = u'<a href="/product_list_admin">点击返回产品列表</a ><body></html>' + display_space
         index_link =  u'<a href="/">点击返回主页</a ><body></html>' + '</br>'
         h = welcome+ h  + '<br>' + add_link + product_link + index_link + entry_time
         return h
@@ -163,7 +163,8 @@ def userListHtml(userret):
             h = h + '<font>' + '余额：' + str(html_balance) + '</font>' + display_space
             h = h + '<font>' + '积分：' + str(html_integral) + '</font>' + display_space
             h = h + '<font>' + '注册时间：' + html_createdtime + '</font>' + display_space
-            h = h + '<font>' + '<a href="/user_del/' + str(html_nid) + u'">删除</a>' + '<br>'
+            h = h + '<font>' + '<a href="/user_del/' + str(html_nid) + u'">删除</a>' + display_space
+            h = h + '<font>' + '<a href="/user_recharge/' + str(html_nid) + u'">充值</a>' + '<br>'
         welcome = u'<fieldset><legend><h2>用户列表</h2></legend>'
         entry_time = u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         index_link = '<br>' + u'<a href="/">点击返回主页</a ><body></html>' + '</br>'

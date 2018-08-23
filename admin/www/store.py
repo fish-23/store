@@ -24,8 +24,9 @@ app = application = bottle.Bottle()
 @app.route('/')
 def index():
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if checkLogin(name, ADMINPASSW) == -1:
-            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
         ipaddr = request.headers.get('X-Real-IP2')
         log.info('admin index ip is %s'%ipaddr)
         index_html = read_file('templates/index.html')
@@ -43,22 +44,21 @@ def apiLogin():
         name = request.forms.get('name')
         password = request.forms.get('password')
         checkret = checkLogin(name, password)
-        if checkret == -1:
-           return red_writing_1(u'用户名密码不正确','/login',u'点击重新登录')
+        if type(checkret)==int and checkret!=0:
+            return mskeErrRedir(-6,'login')
         response.set_cookie('cookie_name', name, secret = 'asf&*457', domain='admin.fish-23.com', path = '/')
         redirect('/')
 
 
 # 产品管理
-@app.route('/product_list')
+@app.route('/product_list_admin')
 def list():
         ipaddr = request.headers.get('X-Real-IP2')
-        log.info('admin product_list ip is %s'%ipaddr)
+        log.info('admin product_list_admin ip is %s'%ipaddr)
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if checkLogin(name, ADMINPASSW) == -1:
-            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
-        log.info('22222')
-        log.info('name is %s'%name)
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
         findret = findProduct(name)
         h = listHtml(findret)
         return h          
@@ -66,8 +66,9 @@ def list():
 @app.route('/product_add')
 def add():
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if checkLogin(name, ADMINPASSW) == -1:
-            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
         ipaddr = request.headers.get('X-Real-IP2')
         log.info('product_add ip is %s'%ipaddr)
         proadd_html = read_file('templates/product_add.html')
@@ -85,41 +86,31 @@ def apiAdd():
         pic = request.files.get('pic')
         category = request.forms.get('category')
         picret = checkPic(pic)
-        if picret == -1:
-            return red_writing_1(u'图片不能为空','/product_add',u'返回')
-        if picret == -2:
-            return red_writing_1(u'图片不能大于1M','/product_add',u'返回')
-        if picret == -3:
-            return red_writing_1(u'该文件不是真正的图片','/product_add',u'返回')
-        if picret == -4:
-            return red_writing_1(u'图片格式不是常用图片格式','/product_add',u'返回')
+        if type(picret)==int and picret!=0:
+            return mskeErrRedir(picret,'product_add')
         proret = saveProduct(name, num, price, discount, description, user_name, category)
-        if proret == -1:
-            return red_writing_1(u'价格,折扣价格,数量必须是正数','/product_add',u'返回')
-        if proret == -2:
-            return red_writing_1(u'产品名格式不正确','/product_add',u'返回')
-        if proret == -3:
-            return red_writing_1(u'产品存在','/product_add',u'返回')
-        if proret == -4:
-            return red_writing_1(u'价格,折扣价格,数量必须大于0.01，小于9999','/product_add',u'返回')
+        if type(proret)==int and proret!=0:
+            return mskeErrRedir(proret,'product_add')
         product_id = proret[0]
         group_id = proret[1]
         picret = saveImage(name, pic, product_id)
-        return red_writing_1(u'产品录入成功','/product_list',u'点击进入产品列表')
+        return mskeErrRedir(5,'product_list_admin')
         
 @app.route('/product_del/<html_nid>')
 def lis_del(html_nid):
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if checkLogin(name, ADMINPASSW) == -1:
-            return red_writing_1(u'用户尚未登录','/login',u'点击登录')            
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
         delProduct(html_nid)  
-        return redirect('/product_list')
+        return redirect('/product_list_admin')
 
 @app.route('/product_modify/<html_nid>')
 def product_modify(html_nid):
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if checkLogin(name, ADMINPASSW) == -1:
-            return red_writing_1(u'用户尚未登录','/login',u'点击登录') 
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
         listModifyHtml = modifyProduct(html_nid)
         return listModifyHtml
 
@@ -133,13 +124,14 @@ def product_modify():
         description = request.forms.get('description')
         pic = request.files.get('pic')
         picaddr = request.forms.get('picaddr')
-        return red_writing_1(u'功能开发中','/product_list',u'点击返回')
+        return mskeErrRedir(-46,'product_list_admin')
 
 @app.route('/parameters_list/<html_nid>')
 def list(html_nid):
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if checkLogin(name, ADMINPASSW) == -1:
-            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
         findret = findParameters(html_nid)
         product_nid = html_nid
         h = parametersHtml(findret, product_nid)
@@ -148,8 +140,9 @@ def list(html_nid):
 @app.route('/parameters_add/<product_nid>')
 def add(product_nid):
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if checkLogin(name, ADMINPASSW) == -1:
-            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
         ipaddr = request.headers.get('X-Real-IP2')
         log.info('product_add ip is %s'%ipaddr)
         paramadd_html = read_file('templates/parameters_add.html')
@@ -165,21 +158,18 @@ def apiAdd():
         description = request.forms.get('name')
         description = description.strip()
         pararet = saveParameters(product_nid, num, price, discount, description)
-        if pararet == -1:
-            return red_writing_1(u'价格,折扣价格,数量必须是正数','/parameters_add/%s'%product_nid, u'返回')
-        if pararet == -2:
-            return red_writing_1(u'规格描述不能为空','/product_add/%s'%product_nid, u'返回')
-        if pararet == -3:
-            return red_writing_1(u'价格,折扣价格,数量必须大于0.01，小于9999','/product_add/%s'%product_nid, u'返回')
-        if pararet == -4:
-            return red_writing_1(u'规格已存在','/product_add/%s'%product_nid, u'返回')        
-        return red_writing_1(u'规格录入成功','/parameters_list/%s'%product_nid,u'点击进入规格列表')
+        if type(pararet)==int and pararet!=0:
+            if pararet == -40:
+                return mskeErrRedir(pararet,['parameters_add',product_nid])
+            return mskeErrRedir(pararet,['product_add',product_nid])
+        return mskeErrRedir(6,['parameters_list',product_nid])
 
 @app.route('/parameters_del/<html_nid>')
 def lis_del(html_nid):
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if checkLogin(name, ADMINPASSW) == -1:
-            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
         delret = delParameters(html_nid)
         return redirect('/parameters_list/%s'%delret)
 
@@ -190,8 +180,9 @@ def list():
         ipaddr = request.headers.get('X-Real-IP2')
         log.info('admin user_list ip is %s'%ipaddr)
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if checkLogin(name, ADMINPASSW) == -1:
-            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
         userret = findUser(name)
         h = userListHtml(userret)
         return h
@@ -199,12 +190,21 @@ def list():
 @app.route('/user_del/<html_nid>')
 def lis_del(html_nid):
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if checkLogin(name, ADMINPASSW) == -1:
-            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
         delret = delUser(html_nid)
-        if delret == -1:
-            return red_writing_1(u'不能删除系统管理员','/user_list',u'点击返回')
+        if type(delret)==int and delret!=0:
+            return mskeErrRedir(delret,'user_list')
         return redirect('/user_list')
+
+@app.route('/user_recharge/<html_nid>')
+def lis_del(html_nid):
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
+        ret = userRecharge(html_nid)
 
 
 # 运费管理
@@ -213,8 +213,9 @@ def list():
         ipaddr = request.headers.get('X-Real-IP2')
         log.info('admin carriage_list ip is %s'%ipaddr)
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if checkLogin(name, ADMINPASSW) == -1:
-            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
         findret = findCarriage(name)
         h = carriageHtml(findret)
         return h
@@ -222,16 +223,18 @@ def list():
 @app.route('/carriage_del/<html_nid>')
 def lis_del(html_nid):
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if checkLogin(name, ADMINPASSW) == -1:
-            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
         delret = delCarriage(html_nid)
         return redirect('/carriage_list')
 
 @app.route('/carriage_add')
 def add():
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
-        if checkLogin(name, ADMINPASSW) == -1:
-            return red_writing_1(u'用户尚未登录','/login',u'点击登录')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
         ipaddr = request.headers.get('X-Real-IP2')
         log.info('carriage_add ip is %s'%ipaddr)
         caradd_html = read_file('templates/carriage_add.html')
@@ -242,20 +245,18 @@ def apiAdd():
         name = request.forms.get('name')
         value = request.forms.get('value')
         pararet = saveCarriage(name,value)
-        if pararet == -1:
-            return red_writing_1(u'包邮界限和邮费必须是正数','/carriage_add', u'返回')
-        if pararet == -2:
-            return red_writing_1(u'包邮界限不能小于邮费，并且不能大于9999,','/carriage_add', u'返回')        
-        return red_writing_1(u'邮费录入成功','/carriage_list',u'点击返回')
+        if type(pararet)==int and pararet!=0:
+            return mskeErrRedir(pararet,'carriage_add')
+        return mskeErrRedir(7,'carriage_list')
 
 
 @app.error(404)
 def err(err):
-	return red_writing_1(u'页面不存在','/',u'点击返回主页')
+        return mskeErrRedir(-37,'/')
 
 @app.error(405)
 def err(err):
-	return red_writing_1(u'访问方式不正确','/',u'点击返回主页')
+        return mskeErrRedir(-38,'/')
 
 class StripPathMiddleware(object):
     def __init__(self, a):

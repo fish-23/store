@@ -7,17 +7,85 @@ import sys
 import base64
 import io
 import os
+import asyncio
+import hashlib
+import re
+import string
 sys.path.append('../')
 sys.path.append('/root')
 from log import *
 from config import *
 from PIL import Image
+from random import randint
+from bottle import *
 from store_view import *
+from error import *
+from url import *
+from qcloudsms_py import SmsSingleSender
+from qcloudsms_py.httpclient import HTTPError
+
 from models.base import *
 from models.users import *
 from models.products import *
 from models.product_parameters import *
 from models.settings import *
+from models.categories import *
+from models.groups import *
+from models.ips import *
+from models.shopping_cart import *
+from models.payments import *
+from models.transactions import *
+from models.address import *
+
+
+# url重定向
+def mskeErrRedir(*info):
+    try:
+        long_info = len(info)
+        err_msg = ERR[info[0]]
+        url = info[1]
+        if long_info == 2:
+            if type(url) == list:
+                url_id = url[1]
+                url = url[0]
+                urll = URL[url]
+                url_msg = URL_MSG[url]
+                return red_writing_1(err_msg,urll%url_id,url_msg)
+            urll = URL[url]
+            url_msg = URL_MSG[url]
+            return red_writing_1(err_msg,urll,url_msg)
+        if long_info == 3:
+            url2 = info[2]
+            if type(url) == list:
+                url_id = url[1]
+                url = url[0]
+                urll = URL[url]
+                url_msg = URL_MSG[url]
+                if type(url2) == list:
+                    url2_id = url2[1]
+                    url2 = url2[0]
+                    urll2 = URL[url2]
+                    url_msg2 = URL_MSG[url2]
+                    return red_writing_2(err_msg,urll%url_id,url_msg,urll2%url2_id,url_msg2)
+                urll = URL[url]
+                url_msg = URL_MSG[url]
+                urll2 = URL[url2]
+                url_msg2 = URL_MSG[url2]
+                return red_writing_2(err_msg,urll%url_id,url_msg,urll2,url_msg2)
+            urll = URL[url]
+            url_msg = URL_MSG[url]
+            if type(url2) == list:
+                url2_id = url2[1]
+                url2 = url2[0]
+                urll2 = URL[url2]
+                url_msg2 = URL_MSG[url2]
+                return red_writing_2(err_msg,urll,url_msg,urll2%url2_id,url_msg2)
+            urll2 = URL[url2]
+            url_msg2 = URL_MSG[url2]
+            return red_writing_2(err_msg,urll,url_msg,urll2,url_msg2)
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
 
 
 # login
@@ -48,16 +116,17 @@ def checkPrice(num, price, discount):
         log.error(traceback.format_exc())
 
 
+
 # 图片检测
 def checkPic(pic):
     try:
         if pic == None:
-            return -1
+            return -15
         pic_size = pic.file   
         pic_size.seek(0,2)   
         pic_size = pic_size.tell()
         if pic_size > 1048000:
-            return -2
+            return -16
         pic_distinguish = pic.file
         bValid = True
         try:
@@ -65,11 +134,11 @@ def checkPic(pic):
         except:
             bValid = False 
         if bValid == False:
-            return -3
+            return -17
         pic_name, pic_ext = os.path.splitext(pic.filename)
         pic_ext = pic_ext.lower()
         if str(pic_ext) not in ['.jpeg', '.bmp', '.png', '.webp', '.gif', '.jpg']:
-            return -4
+            return -18
         return 0
     except Exception as e:
         log.error(traceback.format_exc())
@@ -115,11 +184,11 @@ def saveProduct(name, num, price, discount, description, user_name, category):
     try:
         checkret = checkPrice(num, price, discount)
         if checkret == -1:
-            return -1
+            return -40
         if checkret == -2:
-            return -4
+            return -43
         if name == '':
-            return -2
+            return -41
         price = round(float(price),2)
         discount = round(float(discount),2)
         owner_id = Users.select(Users.id).where(Users.name == user_name)
@@ -131,7 +200,7 @@ def saveProduct(name, num, price, discount, description, user_name, category):
         print('222222222')
         print(product_down.count())
         if product_up.count() > 0:
-            return -3
+            return -42
         if product_down.count() > 0:
             product_add = Products.get(Products.name == name,Products.del_status==-1)
             product_add.name=name
@@ -226,18 +295,18 @@ def saveParameters(product_nid, num, price, discount, description):
     try:
         checkret = checkPrice(num, price, discount) 
         if checkret == -1:
-            return -1
+            return -40
         if checkret == -2:
-            return -3
+            return -43
         if description == '':
-            return -2
+            return -44
         price = round(float(price),2)
         discount = round(float(discount),2)
         para_ret =ProductParameters.select().where(ProductParameters.product==product_nid,ProductParameters.description==description)
         para_up = para_ret.where(ProductParameters.del_status==0)
         para_down = para_ret.where(ProductParameters.del_status==-1)
         if para_up.count() > 0:
-            return -4
+            return -45
         if para_down.count() > 0:
             para_add = ProductParameters.get(ProductParameters.description==description,ProductParameters.del_status==-1)
             para_add.num=num
@@ -273,13 +342,19 @@ def delUser(html_nid):
         user_ret = Users.get(Users.id == html_nid,Users.del_status==0)
         name = user_ret.name
         if name == 'admin':
-            return -1
+            return -47
         user_ret.del_status = -1
         user_ret.description = 'admin后台删除'
         import datetime
         user_ret.del_time = datetime.datetime.now() 
         user_ret.save() 
         return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+def userRecharge(html_nid):
+    try:
+        111
     except Exception as e:
         log.error(traceback.format_exc())
 
@@ -304,9 +379,9 @@ def saveCarriage(name,value):
     try:        
         checkret =  checkPrice(1,name,value)
         if checkret == -1:
-            return -1
+            return -48
         if checkret == -2:
-            return -2
+            return -49
         Settings.create(
                      name=name,
                      value=value,

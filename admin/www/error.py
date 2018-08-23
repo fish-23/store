@@ -1,4 +1,8 @@
-inese_msg = {}
+#!/usr/local/python3
+# -*- coding: UTF-8 -*-
+
+chinese_msg = {}
+
 
 # 成功
 chinese_msg[1] = '注册成功'
