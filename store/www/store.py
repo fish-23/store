@@ -137,19 +137,18 @@ def product_details():
         ret =  checkLogin(login_name)
         if type(ret)==int and ret!=0:
             return mskeErrRedir(ret,'login','register')
-        order_now = request.forms.get('buy')
+        #order_now = request.forms.get('buy')
         shopping_cart = request.forms.get('cart')
         parameter_id = request.forms.get('parameter')
         product_id = request.forms.get('html_nid')
         buy_num = request.forms.get('buynum')
         buy_num = buy_num.strip()
-        checkret = checkDetailsInfo(order_now,shopping_cart,product_id,parameter_id,buy_num,login_name)
+        checkret = checkDetailsInfo(shopping_cart,product_id,parameter_id,buy_num,login_name)
         if type(checkret)==int and checkret!=0:
             if checkret == 2:
                 return mskeErrRedir(checkret,'product_list','shopping_cart')
-            return mskeErrRedir(checkret,['product_details',product_id]) 
-        if checkret == -5:
-            return red_writing_1(u'商品立即购买。功能开发中','/',u'返回主页')
+            return mskeErrRedir(checkret,['product_details',product_id])
+        return mskeErrRedir(-26,'/') 
 
 
 # 购物车
@@ -188,7 +187,7 @@ def transaction_confirm():
         if type(trans_ret)==int and trans_ret!=0:
             if trans_ret == -25 or trans_ret == -22:
                 return mskeErrRedir(trans_ret,'/')
-            return mskeErrRedir(trans_ret,'login','register')
+            return mskeErrRedir(trans_ret,'address_add','address_list')
         return trans_ret     
     
 # 创建订单
@@ -244,8 +243,8 @@ def transaction_create():
         pay = request.forms.get('pay')
         check_ret = checkPayCancel(trans_id,trans_cancel,pay,login_name)
         if type(check_ret)==int and check_ret!=0:
-            return mskeErrRedir(check_ret,'/')
-        return mskeErrRedir(3,'/transaction_list', '/')
+            return mskeErrRedir(check_ret,'transaction_list','/')
+        return mskeErrRedir(3,'transaction_list', '/')
 
 
 # 收货地址
@@ -291,6 +290,8 @@ def address_list():
             return mskeErrRedir(ret,'login','register')
         nid = request.forms.get('defaults')
         ret = addressDefaults(nid,login_name)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'address_list')
         redirect('/address_list')
 
 @app.route('/address_del/<nid>')

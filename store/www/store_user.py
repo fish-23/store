@@ -428,7 +428,7 @@ def productDetails(nid):
     except Exception as e:
         log.error(traceback.format_exc())
 
-def checkDetailsInfo(order_now,shopping_cart,product_id,parameter_id,buy_num,login_name):
+def checkDetailsInfo(shopping_cart,product_id,parameter_id,buy_num,login_name):
     try:
         if buy_num == '':
             return -22
@@ -438,8 +438,8 @@ def checkDetailsInfo(order_now,shopping_cart,product_id,parameter_id,buy_num,log
             return -23
         if parameter_id == None:
             return -24
-        if order_now == '立即购买':
-            return -5
+        #if order_now == '立即购买':
+            #return -5
         if str(shopping_cart) == '加入购物车':
             return shoppingCartAdd(product_id,parameter_id,buy_num,login_name)
         return 0
@@ -691,7 +691,9 @@ def addressList(login_name):
         log.error(traceback.format_exc())
 
 def addressDefaults(nid,login_name):
-    try: 
+    try:
+        if nid == None:
+            return -36
         user_id = userId(login_name)
         count = Address.select().where(Address.users == user_id,Address.defaults == 1).count()
         if count != 0:

@@ -135,11 +135,11 @@ def productDetailsHtml(productret,parameterret):
         welcome = u'<fieldset><legend><h2>产品详情</h2></legend>'
         entry_time = '<br>' + u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))+'</h4>'
         cart_info = '<input type="submit" name="cart" value="加入购物车"/>' + '<br>' + '<br>'
-        buy_info = '<input type="submit" name="buy" value="立即购买"/>'
+        #buy_info = '<input type="submit" name="buy" value="立即购买"/>'
         num_info= '<br>' + '<br>' + '<br>' +'购买数量：' + '<input type="text" name="buynum">' + '<br>'
         index_link = u'<a href="/">点击返回主页</a ><body></html>'+ '<br>'
         product_link = u'<a href="/product_list/none">点击返回产品列表</a ><body></html>' + display_space
-        h = welcome + h + num_info + buy_info + display_space + cart_info + product_link  + index_link + entry_time
+        h = welcome + h + num_info + cart_info + product_link  + index_link + entry_time
         return h
     except Exception as e:
         log.error(traceback.format_exc())
@@ -300,7 +300,7 @@ def transConfirmHtml(address_ret,proditems):
         h = h + '<font color="red"><h3>' + '配送方式(默认快递)：'
         h = h + '快递：'+'<input type="Radio" name="send_way" value="快递">' + '</h3></font>'
         h = h + '<font color="red"><h3>' + '买家留言：' + '<input type="text" name="remark"/>' + '</h3></font>'
-        h = h + '<font color="red"><h3>' + '共%s件商品'%j + display_space  + '小计：￥%s'%db_total_price + '</h3></font>' 
+        h = h + '<font color="red"><h3>' + '共%s件商品'%j + display_space  + '小计：￥%s'%price + '</h3></font>' 
         welcome = u'<fieldset><legend><h2>确认订单</h2></legend>'
         entry_time = u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         carriage =  '<font color="red">'  + '运费：￥' + str(carriage) + '</font>' + display_space
