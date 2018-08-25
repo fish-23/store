@@ -175,17 +175,28 @@ def lis_del(html_nid):
 
 
 # 用户管理
-@app.route('/user_list')
-def list():
+@app.route('/user_list/<name_phone>')
+def list(name_phone):
         ipaddr = request.headers.get('X-Real-IP2')
         log.info('admin user_list ip is %s'%ipaddr)
         name = request.get_cookie('cookie_name', secret = 'asf&*457')
         ret = checkLogin(name, ADMINPASSW)
         if type(ret)==int and ret!=0:
             return mskeErrRedir(ret,'login')
-        userret = findUser(name)
+        print(name_phone)
+        userret = findUser(name,name_phone)
         h = userListHtml(userret)
         return h
+
+@app.route("/api/v1/user_list", method="post")
+def user_list():
+        name_phone = request.forms.get('name_phone')
+        name_phone = name_phone.strip()
+        searchret = userSearchCheck(name_phone)
+        if searchret == -1:
+           redirect('/user_list/none') 
+        redirect('/user_list/%s'%name_phone)
+
 
 @app.route('/user_del/<html_nid>')
 def lis_del(html_nid):
@@ -204,8 +215,19 @@ def lis_del(html_nid):
         ret = checkLogin(name, ADMINPASSW)
         if type(ret)==int and ret!=0:
             return mskeErrRedir(ret,'login')
-        ret = userRecharge(html_nid)
+        ret = userRecharge(html_nid,name)
+        return ret
 
+@app.route('/api/v1/user_recharge', method='POST')
+def apiAdd():
+        operate_id = request.forms.get('operate_id')
+        nid = request.forms.get('nid')
+        balance = request.forms.get('balance')
+        dbbalance = request.forms.get('dbbalance')
+        ret = rechargeCheck(operate_id,nid,balance,dbbalance)    
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,['user_recharge',nid])
+        return mskeErrRedir(8,'user_list')
 
 # 运费管理
 @app.route('/carriage_list')

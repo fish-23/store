@@ -167,8 +167,35 @@ def userListHtml(userret):
             h = h + '<font>' + '<a href="/user_recharge/' + str(html_nid) + u'">充值</a>' + '<br>'
         welcome = u'<fieldset><legend><h2>用户列表</h2></legend>'
         entry_time = u'进入时间:' + display_space +'%s'%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-        index_link = '<br>' + u'<a href="/">点击返回主页</a ><body></html>' + '</br>'
-        h = welcome+ h  + '<br>' + index_link + entry_time
+        user_link = '<br>' + u'<a href="/user_list/none">点击返回用户列表</a ><body></html>' + display_space
+        index_link = u'<a href="/">点击返回主页</a ><body></html>' + '</br>'
+        search_link = '<form action="/api/v1/user_list" method="post">'
+        search_link = search_link + '<font color="red"><h3>' + '用户名(手机号)：' + '<input type="text" name="name_phone"/>' 
+        search_link = search_link + '<input type="submit" value="搜索"/>' + '</h3></font>' +'</form>'
+        h = welcome + search_link  + h  + '<br>' + user_link + index_link + entry_time
+        return h
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+def userRechargeHtml(user_info, operate_id):
+    try:
+        h = '<html><body>'
+        h = h + '<form action="/api/v1/user_recharge" method="post" enctype="multipart/form-data">' 
+        h = h + '<fieldset>'
+        h = h + '<legend>' + ' <h2>' + '余额充值' + ' </h2>' + '</legend>'
+        nid = user_info.id
+        balance = user_info.balance
+        name = user_info.name
+        h = h + '<h3>'
+        h = h + '<input type="hidden" name="operate_id" value="%s"/>'%operate_id
+        h = h + '<input type="hidden" name="nid" value="%s"/>'%nid
+        h = h + '<input type="hidden" name="dbbalance" value="%s"/>'%balance
+        h = h + '<font color="red">' + '用户名：' + name +'</font>' + '<br>'
+        h = h + '<font color="red">' + '可用余额：￥' + str(balance) + '</font>' + '<br>' + '<br>'
+        h = h + '<font color="blue">' + '本次充值金额：' + '<input type="text" name="balance"/>' + '</font><br><br>'
+        h = h + '<input type="submit" value="充值">'
+        h = h + '</h3>'
+        h = h + '</body></html>'
         return h
     except Exception as e:
         log.error(traceback.format_exc())

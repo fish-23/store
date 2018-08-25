@@ -43,11 +43,11 @@ def mskeErrRedir(*info):
     try:
         print('777777')        
         print(info)
-        long = len(info)
+        long_info = len(info)
         err_msg = ERR[info[0]]
         url = info[1]
         print(url)
-        if long == 2:
+        if long_info == 2:
             if type(url) == list:
                 url_id = url[1]
                 url = url[0]
@@ -60,7 +60,7 @@ def mskeErrRedir(*info):
             urll = URL[url]
             url_msg = URL_MSG[url]
             return red_writing_1(err_msg,urll,url_msg)
-        if long == 3:
+        if long_info == 3:
             url2 = info[2]
             if type(url) == list:
                 url_id = url[1]
@@ -262,6 +262,19 @@ def lisAppend(cellphone,sms_num,send_time):
         log.error(traceback.format_exc())
 
 
+# 修改用户余额
+def userBalancesAdd(operate_id,nid,balance,reset,c,v,description):
+    try:
+        if variation_balance == 0:
+            return 0
+        UserBalances.create(user=operate_id, owner=nid, variation_balance=balance,
+                            reset=reset, category=c, variation_category=v,
+                            description=description)
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+
 # register
 async def sendInfo(ipaddr):
     try:
@@ -332,6 +345,11 @@ def SaveInfo(name,password,password2,nickname,birthday,send_sms,gender,info):
         if nickret == -4:
             return -21
         password = hashlib.md5(password.encode('utf8')).hexdigest()
+        phoneret = checkCellphone(cellphone) 
+        if phoneret == -9:
+            return -9
+        if phoneret == -10:
+            return -10
         userinfo = Users.create( name=name, password=password, nickname=nickname,
                                  birthday=birthday, cellphone=cellphone,gender=gender)
         return userinfo.id
@@ -369,7 +387,7 @@ def checkLogin(login_name):
             return -1
         user_ret = Users.select().where(Users.name == login_name)
         if user_ret.count() == 0:
-            return -2
+            return -1
         user_ret = Users.get(Users.name == login_name)
         db_cookie_num = user_ret.cookie_num
         db_login_time = user_ret.login_time
@@ -393,6 +411,8 @@ def checkLogin(login_name):
 def productInfo(name):
     try:
         categories = Categories.select().where(Categories.parent_name == '产品')
+        log.info('22222222222')
+        log.info(categories.count())
         categories_id = [i.id for i in categories]
         categories_name = [i.name for i in categories]
         categories_info = zip(categories_id, categories_name)

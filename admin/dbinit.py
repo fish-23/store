@@ -13,6 +13,7 @@ from models.shopping_cart import *
 from models.address import *
 from models.transactions import *
 from models.payments import *
+from models.user_balance import *
 
 
 import sys
@@ -33,7 +34,8 @@ def createTables():
          ShoppingCart,
          Address,
          Transactions,
-         Payments
+         Payments,
+         UserBalance,
          ] 
     db.create_tables(tables)
 

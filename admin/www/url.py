@@ -16,10 +16,11 @@ url['address_list'] = '/address_list'
 url['transaction_list'] = '/transaction_list'
 url['product_add'] = '/product_add/%s'
 url['parameters_add'] = '/parameters_add/%s'
-url['user_list'] = '/user_list'
+url['user_list'] = '/user_list/none'
 url['carriage_add'] = '/carriage_add'
 url['carriage_list'] = '/carriage_list'
 url['parameters_list'] = '/parameters_list/%s'
+url['user_recharge'] = '/user_recharge/%s'
 
 url_chinese_msg = {}
 url_chinese_msg['/'] = '点击返回主页'
@@ -39,6 +40,7 @@ url_chinese_msg['user_list'] = '点击返回用户列表'
 url_chinese_msg['carriage_add'] = '点击返回'
 url_chinese_msg['carriage_list'] = '点击返回邮费列表'
 url_chinese_msg['parameters_list'] = '点击返回规格列表'
+url_chinese_msg['user_recharge'] = '点击重新输入'
 
 
 URL = url

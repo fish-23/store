@@ -1,4 +1,7 @@
-inese_msg = {}
+#!/usr/local/python3
+# -*- coding: UTF-8 -*-
+
+chinese_msg = {}
 
 # 成功
 chinese_msg[1] = '注册成功'
@@ -50,6 +53,7 @@ chinese_msg[-32] = '请添加收货地址'
 chinese_msg[-33] = '请设置默认收货地址'
 chinese_msg[-34] = '填写的数据不能为空'
 chinese_msg[-35] = '选择是否设置为默认地址'
+chinese_msg[-36] = '请选择设置的收货地址，如果收货地址不存在，请添加'
 # 404，405
 chinese_msg[-37] = '页面不存在'
 chinese_msg[-38] = '访问方式不正确'

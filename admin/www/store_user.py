@@ -36,6 +36,7 @@ from models.shopping_cart import *
 from models.payments import *
 from models.transactions import *
 from models.address import *
+from models.user_balance import *
 
 
 # url重定向
@@ -87,6 +88,16 @@ def mskeErrRedir(*info):
     except Exception as e:
         log.error(traceback.format_exc())
 
+def userBalancesAdd(operate_id,nid,balance,reset,c,v,description):
+    try:
+        if v == 0:
+            return 0
+        UserBalance.create(user=operate_id, owner=nid, variation_balance=balance,
+                            reset=reset, category=c, variation_category=v,
+                            description=description)
+        return 0
+    except Exception as e:
+        log.error(traceback.format_exc())
 
 # login
 def checkLogin(name, password):
@@ -223,13 +234,10 @@ def saveProduct(name, num, price, discount, description, user_name, category):
                                  category=int(category), 
                                  group=group_id
                                  )
-        print('3333333333333')                       
         lis = []
         product_id = product_add.id
-        print('product_id is',product_id)
         lis.append(int(product_id))
         lis.append(int(group_id))
-        print('lis is',lis)
         return lis        
     except Exception as e:
         log.error(traceback.format_exc())
@@ -330,10 +338,22 @@ def saveParameters(product_nid, num, price, discount, description):
 
 
 # 用户管理
-def findUser(name):
+def findUser(name,name_phone):
     try:
-        userret = Users.select().where(Users.del_status==0)
+        name_phone = name_phone.strip()
+        if name_phone == 'none':
+            userret = Users.select().where(Users.del_status==0)
+        else:
+            user_ret = Users.select().where(Users.name.contains('%s'%name_phone) | Users.cellphone.contains('%s'%name_phone))
+            userret = user_ret.where(Users.del_status==0)
         return userret
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+def userSearchCheck(name_phone):
+    try:
+        if len(name_phone) == 0:
+            return -1 
     except Exception as e:
         log.error(traceback.format_exc())
 
@@ -352,9 +372,27 @@ def delUser(html_nid):
     except Exception as e:
         log.error(traceback.format_exc())
 
-def userRecharge(html_nid):
+def userRecharge(html_nid,name):
     try:
-        111
+        operate_id = Users.get(Users.name == name).id
+        user_info = Users.get(Users.id == html_nid)
+        return userRechargeHtml(user_info,operate_id)
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+def rechargeCheck(operate_id,nid,balance,dbbalance):
+    try:
+        if balance.isnumeric() == False:
+            return -50
+        balance = int(balance)
+        if balance <1:
+            return -50
+        reset = balance + float(dbbalance)
+        description = 'admin 后台充值'
+        userBalancesAdd(operate_id,nid,int(balance),reset,1,1,description)
+        user_info = Users.get(Users.id == nid)
+        user_info.balance = reset
+        user_info.save()
     except Exception as e:
         log.error(traceback.format_exc())
 

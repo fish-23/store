@@ -12,6 +12,7 @@ chinese_msg[4] = '收货地址添加成功'
 chinese_msg[5] = '产品录入成功'
 chinese_msg[6] = '规格录入成功'
 chinese_msg[7] = '邮费录入成功'
+chinese_msg[8] = '充值成功'
 
 
 # store
@@ -72,6 +73,8 @@ chinese_msg[-45] = '规格已存在'
 chinese_msg[-47] = '不能删除系统管理员'
 chinese_msg[-48] = '包邮界限和邮费必须是正数'
 chinese_msg[-49] = '包邮界限不能小于邮费，并且不能大于9999'
+# 充值
+chinese_msg[-50] = '充值金额必须是正数，且必须大于0'
 
 
 ERR = chinese_msg

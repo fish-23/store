@@ -82,7 +82,7 @@ def register_add():
         if type(picret)==int and picret!=0:
             return mskeErrRedir(picret,'register_add')
         checkret = SaveInfo(name,password,password2,nickname,birthday,send_sms,gender,info)
-        if type(checkret)==int and checkret!=0:
+        if type(checkret)==int and checkret<0:
             if checkret == -21:
                 return mskeErrRedir(checkret,'register')
             return mskeErrRedir(checkret,'register_add')
@@ -291,6 +291,8 @@ def address_list():
         nid = request.forms.get('defaults')
         ret = addressDefaults(nid,login_name)
         if type(ret)==int and ret!=0:
+            if ret == -36:
+                return mskeErrRedir(ret,'address_add','address_list')
             return mskeErrRedir(ret,'address_list')
         redirect('/address_list')
 
