@@ -36,6 +36,7 @@ from models.shopping_cart import *
 from models.payments import *
 from models.transactions import *
 from models.address import *
+from models.user_balance import *
 
 
 # url重定向
@@ -262,12 +263,12 @@ def lisAppend(cellphone,sms_num,send_time):
         log.error(traceback.format_exc())
 
 
-# 修改用户余额
+# 余额变动
 def userBalancesAdd(operate_id,nid,balance,reset,c,v,description):
     try:
-        if variation_balance == 0:
+        if v == 0:
             return 0
-        UserBalances.create(user=operate_id, owner=nid, variation_balance=balance,
+        UserBalance.create(user=operate_id, owner=nid, variation_balance=balance,
                             reset=reset, category=c, variation_category=v,
                             description=description)
         return 0
@@ -411,6 +412,7 @@ def checkLogin(login_name):
 def productInfo(name):
     try:
         categories = Categories.select().where(Categories.parent_name == '产品')
+        #categories = Categories.select()
         log.info('22222222222')
         log.info(categories.count())
         categories_id = [i.id for i in categories]
@@ -584,6 +586,9 @@ def transCreate(proditems,address_id,send_way,remark,login_name):
             address_id = Address.get(Address.users == user_id,Address.defaults == 1).id
         if send_way == None:
             send_way = '快递'
+        trans_willpay = Transactions.select().where(Transactions.users == user_id,Transactions.trade_status ==1)
+        if trans_willpay.count() > 2:
+            return -50
         remark = remark.strip()
         address = Address.get(Address.id == address_id)
         address = "收货人:%s,手机号:%s,收货地址:%s" % (address.name,address.phone,address.city+address.address)
@@ -640,6 +645,8 @@ def payTrans(trans_id,user_id):
         user_info.save()
         trans_info.trade_status = 2
         trans_info.save()
+        description = '产品购买'
+        userBalancesAdd(user_id,user_id,total_price,balance_ret,1,2,description)
         return 0
     except Exception as e:
         log.error(traceback.format_exc())
@@ -649,12 +656,19 @@ def checkPayCancel(trans_id,trans_cancel,pay,login_name):
     try:
         user_id = userId(login_name)
         if trans_cancel == '取消订单':
+            trans_ret = Transactions.select().where(Transactions.id == trans_id,Transactions.del_status == -1).count()
+            if trans_ret != 0:
+                return -14 
             transCancel(trans_id)
             return -29
         if pay == '去支付':
+            trans_ret = Transactions.select().where(Transactions.id == trans_id,Transactions.trade_status == 2).count()
+            if trans_ret != 0:
+                return -26
             pay_ret = payTrans(trans_id,user_id)
             if pay_ret == -1:
-                return -31
+                 return -31 
+        return 0
     except Exception as e:
         log.error(traceback.format_exc())
 

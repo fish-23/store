@@ -404,7 +404,7 @@ def tranListHtmlShow(trans_info,h):
                 time_stamp = int(created_time.timestamp())
                 now_time = int(time.time())
                 if trans_ret.trade_status == 1:
-                    if (now_time -time_stamp) > 7200200:
+                    if (now_time -time_stamp) > 7200:
                         from  store_user import transCancel
                         transCancel(item)
                         continue                

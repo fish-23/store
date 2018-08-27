@@ -8,6 +8,8 @@ from PIL import Image
 import sys
 sys.path.append('/root')
 from log import *
+from models.payments import *
+from models.transactions import *
 
 
 display_space = '&nbsp' + '&nbsp' + '&nbsp' + '&nbsp' + '&nbsp' + '&nbsp'
@@ -219,6 +221,93 @@ def carriageHtml(findret):
         add_link = '<br>' + u'<a href="/carriage_add">点击添加</a ><body></html>' + display_space
         index_link = u'<a href="/">点击返回主页</a ><body></html>' + '</br>'
         h = welcome+ h  + '<br>' + add_link + index_link + entry_time
+        return h
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+
+# 订单管理
+def transHtml(trans_info):
+    try:
+        h = '<html>'
+        if trans_info.count():
+            trans_id = [i.id for i in trans_info]
+            for item in trans_id:
+                trans_ret = Transactions.get(Transactions.id == item)
+                created_time = trans_ret.created_time
+                time_stamp = int(created_time.timestamp())
+                now_time = int(time.time())
+                if trans_ret.trade_status == 1:
+                    if (now_time -time_stamp) > 7200:
+                        continue                
+                total_price = trans_ret.total_price
+                carriage = trans_ret.carriage
+                trade_id = trans_ret.trade_id
+                users_name = trans_ret.users.name
+                nid = trans_ret.id
+                h = h + '<font color="blue"><h3>'
+                h = h + '<font>' + '编号：' + str(nid) + '</font>' + display_space
+                h = h + '<font>' + '用户：' + users_name + '</font>' + display_space
+                h = h + '<font>' + '总价：￥' + str(total_price) + '</font>' + display_space
+                h = h + '<font>' + '订单创建时间：' + str(created_time) + '</font>' + display_space
+                h = h + '<a href="/trans_details/' + str(item) + u'">详情</a>' 
+                h = h + '</font></h3>'
+        else:
+            h = '<font color="red"><h3>' + '没有相应的订单' + '</font></h3>'
+        welcome = u'<fieldset><legend><h2>订单管理</h2></legend>'
+        time_now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        entry_time = '<h3>' + u'进入时间:' + display_space +'%s'%(time_now) + '</h3>'        
+        index_link = u'<a href="/">进入主页</a ><body></html>'+ '</h3>'
+        trans_link = '<h3>' + u'<a href="/trans_list">进入订单管理</a ><body></html>' + display_space    
+        h = welcome + h + trans_link + index_link + entry_time
+        return h
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+def transDetailsHtml(trans_info):
+    try:
+        h = '<html>'
+        total_price = trans_info.total_price
+        users_name = trans_info.users.name
+        nid = trans_info.id
+        created_time = trans_info.created_time
+        carriage  = trans_info.carriage
+        address = trans_info.address
+        remark = trans_info.remark
+        pay_way = '余额'
+        send_way = '快递'
+        h = h + '<font color="red"><h3>' + '订单信息' + '</font></h3>'
+        h = h + '<font color="blue"><h3>'
+        h = h + '编号：' + str(nid) + display_space
+        h = h + '用户：' + users_name + display_space
+        h = h + '总价：￥' + str(total_price) + display_space
+        h = h + '订单创建时间：' + str(created_time) + '<br>'
+        h = h + '配送方式' + send_way  + display_space
+        h = h + '支付方式' + pay_way + display_space
+        h = h + '收货地址' + address
+        h = h + '</font></h3>'
+        h = h + '<font color="red"><h3>' + '买家留言：' + remark + '</font></h3>'
+        h = h + '<font color="red"><h3>' + '产品信息' + '</font></h3>'
+        payments_info = Payments.select().where(Payments.transactions == nid,Payments.del_status == 0)
+        for item in payments_info:
+            name = item.products.name
+            thumbnail = item.products.thumbnail
+            num = item.num
+            discount = item.parameters.discount
+            description = item.parameters.description
+            h = h + '<font color="blue"><h3>'
+            h = h + '<img src="data:image/jpg;base64,%s"/>'%thumbnail + display_space
+            h = h + '商品名称：' + name + '</font>' + display_space
+            h = h + '价格：￥' + str(discount) + display_space
+            h = h + '规格描述：' + description + display_space
+            h = h + '购买数量：' + str(num) 
+            h = h + '</font></h3><br>'        
+        welcome = u'<fieldset><legend><h2>订单详情</h2></legend>'
+        time_now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        entry_time = '<h3>' + u'进入时间:' + display_space +'%s'%(time_now) + '</h3>'        
+        index_link = u'<a href="/">进入主页</a ><body></html>'+ '</h3>'
+        trans_link = '<h3>' + u'<a href="/trans_list">进入订单管理</a ><body></html>' + display_space    
+        h = welcome + h + trans_link + index_link + entry_time
         return h
     except Exception as e:
         log.error(traceback.format_exc())

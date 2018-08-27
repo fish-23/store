@@ -205,6 +205,8 @@ def transaction_create():
         proditems = proditems.replace("'","\"")
         proditems = json.loads(proditems)
         trans_ret = transCreate(proditems,address_id,send_way,remark,login_name)
+        if type(trans_ret)==int and trans_ret<0:
+            return mskeErrRedir(trans_ret,'transaction_list','/')
         cart_clear = cartClear(trans_ret) 
         redirect('/transaction_details/%s'%trans_ret)
 

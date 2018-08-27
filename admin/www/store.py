@@ -272,6 +272,68 @@ def apiAdd():
         return mskeErrRedir(7,'carriage_list')
 
 
+# 订单管理
+@app.route('/trans_list')
+def list():
+        ipaddr = request.headers.get('X-Real-IP2')
+        log.info('admin trans_list ip is %s'%ipaddr)
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
+        trans_html = read_file('templates/trans.html')
+        return trans_html
+
+@app.route('/trans_will_pay')
+def list():
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
+        trade_status = [1]
+        ret = findTrans(trade_status)
+        return ret
+
+@app.route('/trans_will_send')
+def list():
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
+        trade_status = [2,5]
+        ret = findTrans(trade_status)
+        return ret
+
+@app.route('/trans_will_receive')
+def list():
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
+        trade_status = [3,6]
+        ret = findTrans(trade_status)
+        return ret
+
+@app.route('/trans_finish')
+def list():
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
+        trade_status = [4,7,8]
+        ret = findTrans(trade_status)
+        return ret
+
+@app.route('/trans_details/<html_nid>')
+def list(html_nid):
+        name = request.get_cookie('cookie_name', secret = 'asf&*457')
+        ret = checkLogin(name, ADMINPASSW)
+        if type(ret)==int and ret!=0:
+            return mskeErrRedir(ret,'login')
+        ret = transDetails(html_nid)
+        return ret
+
+
 @app.error(404)
 def err(err):
         return mskeErrRedir(-37,'/')

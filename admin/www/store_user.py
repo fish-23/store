@@ -429,3 +429,19 @@ def saveCarriage(name,value):
         return 0
     except Exception as e:
         log.error(traceback.format_exc())
+
+
+# 订单管理
+def findTrans(trade_status):
+    try:
+        trans_info = Transactions.select().where(Transactions.trade_status << trade_status,Transactions.del_status == 0)
+        return transHtml(trans_info)
+    except Exception as e:
+        log.error(traceback.format_exc())
+
+def transDetails(html_nid):
+    try:
+        trans_info = Transactions.get(Transactions.id == html_nid,Transactions.del_status == 0)
+        return transDetailsHtml(trans_info)
+    except Exception as e:
+        log.error(traceback.format_exc())

@@ -46,8 +46,11 @@ chinese_msg[-25] = '购买异常，请联系网站工作人员'
 chinese_msg[-27] = '只能删除自己的购物车产品'
 # 订单
 chinese_msg[-28] = '只能支付自己的订单'
+chinese_msg[-26] = '支付异常，此订单已支付'
 chinese_msg[-29] = '订单已取消'
+chinese_msg[-14] = '订单取消异常，此订单不存在'
 chinese_msg[-31] = '账户余额不足，请联系管理员充值'
+chinese_msg[-50] = '你有两个待支付订单，处理完订单后再进行购买'
 # 收货地址
 chinese_msg[-32] = '请添加收货地址'
 chinese_msg[-33] = '请设置默认收货地址'
