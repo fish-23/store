@@ -16,7 +16,7 @@
       解答：先将图片转化成二进制流，然后用base64进行编码后，就可以存入数据库
             [参考文档](https://www.jianshu.com/p/2ff8e6f98257)
 ### 7，将bytes64编码的图片，用html展示
-      解答：<img src="data:image/jpg;base64,%s"/>'%html_thumbnail
+      解答：'<img src="data:image/jpg;base64,%s"/>'%html_thumbnail
 ### 8，request.environ,get('X-Real-IP') 获取不到用户的ip地址
       解答：浏览器在请求服务器的时候，在HTTP头上会携带用户ip，现在没有获取到ip，证明在打印之前的某一步出错，没有获取到用户ip。
             先用 nc -l 命令监听项目中途经过的端口(443端口被nginx监听，需要杀死nginx用nc监听)，看是否有错误，测试证明，所有端口都没有错误
@@ -49,7 +49,7 @@
             参考淘宝京东的商品下柜，当产品需要删除时，通过一个字段改变状态，而不是真正意义上的删除
 ### 16，字符串和字典的转化
       解答：str = '{'price': 70.0, 'lis': [{'cart_nid': 1, 'product_id': 1}, {'cart_nid': 2, 'product_id': 2]}'
-            str = str.replace("'","\"")
+            str = str.replace("'","\")
             dic = json.loads(str)
 ### 17，MySQL删除数据库时无响应
       解答：执行show full processlist观察state和info两列，查看有哪些线程在运行。经过查询发现之前远程删除的时候由于网络中断，锁表了。
@@ -62,3 +62,5 @@
             check_ret = re_check.search(name)
             if check_ret:
                 return '有汉字'
+### 19，后台运行程序
+      解答：nohup python3 store.py &
